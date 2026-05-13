@@ -1,0 +1,7 @@
+pandas
+xlwings
+pyxlsb
+xlrd
+openpyxl
+pytest
+pytest-cov

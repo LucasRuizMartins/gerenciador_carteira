@@ -1,0 +1,30 @@
+# Ambientes Virtuais
+venv/
+escritorio/
+env/
+.env
+
+# Arquivos compilados do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ferramentas e Testes
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# SO
+.DS_Store
+Thumbs.db
