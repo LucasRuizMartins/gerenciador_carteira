@@ -98,6 +98,11 @@ class TestConverterMoeda:
     def test_retorna_zero_para_apenas_virgula(self):
         assert converter_moeda(",") == 0.0
 
+    def test_retorna_zero_para_tipos_invalidos_excecao(self):
+        # Testa a branch do except (ValueError, TypeError)
+        # O input "-" vai falhar na conversão float("-")
+        assert converter_moeda("-") == 0.0
+
 
 # ===========================================================================
 # TestLimparValorMonetario
@@ -115,6 +120,13 @@ class TestLimparValorMonetario:
 
     def test_retorna_zero_para_nulo(self):
         assert limpar_valor_monetario(None) == 0.0
+
+    def test_retorna_zero_para_tipos_invalidos_excecao(self):
+        # Testa a branch do except (ValueError, TypeError)
+        class MockErroStr:
+            def __str__(self):
+                raise TypeError("Erro simulado")
+        assert limpar_valor_monetario(MockErroStr()) == 0.0
 
 
 # ===========================================================================
@@ -150,6 +162,16 @@ class TestResetarCabecalho:
         ])
         resultado = resetar_cabecalho(df)
         assert resultado.index.tolist() == [0]
+
+    def test_retorna_df_original_se_excecao(self):
+        # Testa a branch do except Exception passando um mock malformado
+        class MockDF:
+            empty = False
+            def __len__(self): return 2
+            def copy(self): raise Exception("Erro")
+        
+        mock = MockDF()
+        assert resetar_cabecalho(mock) is mock
 
 
 # ===========================================================================
@@ -347,3 +369,46 @@ class TestBuscarValorEmDataframe:
             df_resumo, "ANBIMA", "Categoria", 1
         )
         assert resultado == -250.0
+
+    def test_busca_retorna_zero_se_excecao(self):
+        # Testa a branch except Exception (ex: coluna que não existe)
+        df_vazio = pd.DataFrame()
+        resultado = buscar_valor_em_dataframe(df_vazio, "Algo", "Inexistente", "Inexistente")
+        assert resultado == 0.0
+
+
+# ===========================================================================
+# TestEncontrarLinhasMarcadores
+# ===========================================================================
+
+
+class TestEncontrarLinhasMarcadores:
+    """Testes para encontrar_linhas_marcadores()."""
+
+    @pytest.fixture
+    def df_marcadores(self):
+        return pd.DataFrame({
+            "Secao": ["HEADER", "Valores a Pagar", "Cotas Superiores", "RESUMO DA CARTEIRA"],
+        })
+
+    def test_encontra_marcadores_exatos_e_parciais(self, df_marcadores):
+        marcadores = {
+            "pagar": ["Valores a Pagar", "VALORES A LIQUIDAR"],
+            "resumo": ["Resumo Carteira", "resumo da carteira"],
+            "cotas": ["Cotas Inferiores", "COTAS SUPERIORES"]
+        }
+        
+        from src.core.converters import encontrar_linhas_marcadores
+        resultado = encontrar_linhas_marcadores(df_marcadores, marcadores, "Secao")
+        
+        assert resultado["pagar"] == "Valores a Pagar" # Exato
+        assert resultado["resumo"] == "RESUMO DA CARTEIRA" # Parcial case-insensitive
+        assert resultado["cotas"] == "Cotas Superiores" # Parcial case-insensitive
+
+    def test_ignora_marcadores_nao_encontrados(self, df_marcadores):
+        marcadores = {
+            "inexistente": ["Nada", "Zero"]
+        }
+        from src.core.converters import encontrar_linhas_marcadores
+        resultado = encontrar_linhas_marcadores(df_marcadores, marcadores, "Secao")
+        assert len(resultado) == 0

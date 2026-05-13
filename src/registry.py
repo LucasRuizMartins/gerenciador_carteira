@@ -22,6 +22,8 @@ Uso:
 """
 
 from __future__ import annotations
+from src.core.logger import get_logger
+logger = get_logger(__name__)
 
 import os
 from dataclasses import dataclass, field
@@ -248,7 +250,10 @@ def processar_fundo_registrado(
 
     cfg = REGISTRO[nome_fundo]
 
-    print(f"\n>>> Processando: {cfg.nome} (aba: {aba})")
+    logger.info(f"\n>>> Processando: {cfg.nome} (aba: {aba})")
+    
+    import time
+    start_time = time.time()
 
     # Resolve paths
     path_carteira = resolver_path_carteira(cfg.chave_carteira)
@@ -276,7 +281,8 @@ def processar_fundo_registrado(
     if cfg.abrir_apos_salvar:
         os.startfile(path_relatorio)
 
-    print(f"✔ {cfg.nome} processado com sucesso.")
+    elapsed_time = time.time() - start_time
+    logger.info(f"✔ {cfg.nome} processado com sucesso em {elapsed_time:.2f}s.")
 
 
 def listar_fundos_registrados() -> list[str]:

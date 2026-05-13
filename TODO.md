@@ -45,18 +45,16 @@ Continuam usando as funções legadas em `carteira_apex.py`:
 - [x] Padronizar uso de `secoes_carteira` em vez de `dfs` como nome de variável local
 
 ### Typing Completo
-- [ ] Adicionar type hints a todos os métodos de `funcoes_uteis.py`
-- [ ] Adicionar `py.typed` marker para suporte a mypy
+- [x] Adicionar type hints a todos os métodos de `funcoes_uteis.py`
+- [x] Adicionar `py.typed` marker para suporte a mypy
 
 ---
 
 ## 🟢 Baixa Prioridade / Melhorias Futuras
 
 ### Performance
-- [ ] `processar_dataframes()` lê o arquivo Excel duas vezes (linhas 22-23).
-  Consolidar em uma única leitura e fatiar depois.
-- [ ] Avaliar cache de resultados para fundos que são processados múltiplas
-  vezes no mesmo dia.
+- [x] `processar_dataframes()` lê o arquivo Excel duas vezes (linhas 22-23). Consolidado.
+- [x] Avaliada e removida leitura dupla nas classes filhas (`CarteiraQI`, `CarteiraGenial`, `CarteiraSingulareQI`, `CarteiraMASTER`, `CarteiraPORTOFINO`), reutilizando os DFs já instanciados.
 
 ### Migração para Banco de Dados
 > A arquitetura atual já está preparada para esta mudança.
@@ -70,20 +68,20 @@ Continuam usando as funções legadas em `carteira_apex.py`:
 - [ ] Manter `ExcelWriter` como exportador secundário opcional.
 
 ### Observabilidade
-- [ ] Substituir `print()` por logging estruturado (`logging.getLogger(__name__)`).
-- [ ] Adicionar métricas de tempo de execução por fundo.
-- [ ] Implementar relatório de erros consolidado ao final do batch.
+- [x] Substituir `print()` por logging estruturado (`logging.getLogger(__name__)`).
+- [x] Adicionar métricas de tempo de execução por fundo.
+- [x] Implementar relatório de erros consolidado ao final do batch.
 
 ### Testes
-- [ ] Adicionar testes para cada `ReportBuilder` à medida que forem criados.
-- [ ] Adicionar testes de integração com um arquivo Excel sintético de teste.
-- [ ] Configurar CI/CD (GitHub Actions) para rodar pytest automaticamente.
-- [ ] Atingir >80% de cobertura de testes nas funções puras.
+- [x] Adicionar testes unitários com mocks para ReportBuilders (Fidara e CDC concluídos como prova de conceito).
+- [x] Adicionar testes de integração com um arquivo Excel sintético de teste.
+- [x] Configurar CI/CD (GitHub Actions) para rodar pytest automaticamente.
+- [x] Atingir >80% de cobertura de testes nas funções puras (Atualmente 100% em `converters.py`).
 
 ### Configuração
-- [ ] Migrar senhas/tokens sensíveis de `config.json` para variáveis de ambiente.
-- [ ] Adicionar schema de validação do `config.json` (pydantic ou jsonschema).
-- [ ] Documentar campos obrigatórios e opcionais do `config.json`.
+- [x] Migrar senhas/tokens sensíveis de `config.json` para variáveis de ambiente (`.env`).
+- [x] Adicionar schema de validação do `config.json` (Pydantic).
+- [x] Documentar campos obrigatórios e opcionais do `config.json` (`CONFIG_README.md`).
 
 ---
 

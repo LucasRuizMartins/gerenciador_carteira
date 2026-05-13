@@ -15,6 +15,8 @@ Hierarquia de classes:
 """
 
 from __future__ import annotations
+from src.core.logger import get_logger
+logger = get_logger(__name__)
 
 import locale
 import re
@@ -25,7 +27,7 @@ from zipfile import ZipFile
 
 import pandas as pd
 
-from funcoes_uteis import processar_dataframes,  agrupar_dataframe_codigo
+from funcoes_uteis import processar_dataframes, agrupar_dataframe_codigo
 
 locale.setlocale(locale.LC_ALL, "pt_BR.UTF-8")
 
@@ -42,7 +44,7 @@ def _resetar_cabecalho(df: pd.DataFrame) -> pd.DataFrame:
         df.columns = df.iloc[0]
         return df.iloc[1:].reset_index(drop=True)
     except Exception as exc:
-        print(f"Erro ao resetar cabeçalho: {exc}")
+        logger.error(f"Erro ao resetar cabeçalho: {exc}")
         return df
 
 
@@ -85,7 +87,7 @@ def _converter_moeda(valor: Any) -> float:
         numero = float(limpo.replace(",", "."))
         return -abs(numero) if negativo else numero
     except Exception as exc:
-        print(f"Erro ao converter valor '{valor}': {exc}")
+        logger.error(f"Erro ao converter valor '{valor}': {exc}")
         return 0.0
 
 
@@ -214,7 +216,7 @@ class CarteiraBase(ABC):
                 return df.loc[filtro].values[0, coluna_valor]
             return df.loc[filtro, coluna_valor].values[0]
         except Exception:
-            print(f"Valor '{codigo}' não encontrado.")
+            logger.info(f"Valor '{codigo}' não encontrado.")
             return 0.0
 
     def _recuperar_taxa(
@@ -235,7 +237,7 @@ class CarteiraBase(ABC):
             return float(resultado.iloc[0]) if not resultado.empty else 0.0
         except Exception as exc:
             # Remova o print depois de validar para não poluir o terminal
-            print(f"Erro ao recuperar taxa '{categoria}': {exc}")
+            logger.error(f"Erro ao recuperar taxa '{categoria}': {exc}")
             return 0.0
 
     def _popular_taxas(
@@ -292,17 +294,17 @@ class _MixinCdAtual:
             resultado = self.dataframe.loc[self.dataframe["Unnamed: 0"] == categoria]
             if not resultado.empty:
                 return resultado.iloc[0, coluna]
-            print(f"Não foi possível encontrar '{categoria}'.")
+            logger.info(f"Não foi possível encontrar '{categoria}'.")
             return 0.0
         except Exception as exc:
-            print(f"Erro ao converter valores: {exc}")
+            logger.error(f"Erro ao converter valores: {exc}")
             return 0.0
 
     def recuperar_valor_carteira(self, codigo: str, coluna: int) -> float:
         try:
             return self.dataframe[self.dataframe["Unnamed: 0"] == codigo].values[0, coluna]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_valor_carteira_coluna(
@@ -316,7 +318,7 @@ class _MixinCdAtual:
                 self.dataframe[coluna_descricao] == codigo
             ].values[0, coluna_valor]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
 
@@ -375,7 +377,7 @@ class Carteira(CarteiraBase):
                 if not pdd_rows.empty:
                     self.pdd = pdd_rows.iloc[0, 2]
         except Exception as exc:
-            print(f"Aviso: métricas não atualizadas – {exc}")
+            logger.warning(f"Aviso: métricas não atualizadas – {exc}")
             self.saldo_tesouraria = 0.0
             self.patrimonio_total = 0.0
             self.pdd = 0.0
@@ -472,7 +474,7 @@ class _MixinParseBRL:
         for chave, nome in categorias.items():
             linha = self._localizar_linha(df, nome, coluna)
             if linha is None:
-                print(f"Aviso: '{nome}' não encontrado. Usando fim do DataFrame.")
+                logger.warning(f"Aviso: '{nome}' não encontrado. Usando fim do DataFrame.")
                 linha = len(df)
             resultado[chave] = linha
         return resultado
@@ -574,7 +576,7 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
         _obrigatorios = {"contas_pagar", "fim_contas_pagar"}
         faltando_obrig = _obrigatorios - marcadores_encontrados.keys()
         if faltando_obrig:
-            print(
+            logger.info(
                 f"Aviso CarteiraBRL._processar_planilha: marcadores obrigatórios não encontrados: {faltando_obrig}\n"
                 f"  Valores únicos na coluna '{col}':\n"
                 f"  {[v for v in valores_col if not v.startswith('Unnamed')][:60]}"
@@ -614,8 +616,8 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
             df_cotas = secoes_carteira["cotas_superiores"]
             # Debug para ajudar a identificar o erro 'Ordem'
             if "Ordem" not in df_cotas.columns and not df_cotas.empty:
-                print(f"DEBUG CDC/BRL: Coluna 'Ordem' não encontrada em 'cotas_superiores'.")
-                print(f"Colunas detectadas: {list(df_cotas.columns)}")
+                logger.info(f"DEBUG CDC/BRL: Coluna 'Ordem' não encontrada em 'cotas_superiores'.")
+                logger.info(f"Colunas detectadas: {list(df_cotas.columns)}")
                 
         return secoes_carteira
 
@@ -637,7 +639,7 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
             resultado = self.dataframe.loc[self.dataframe[col] == categoria]
             return resultado.iloc[0, coluna] if not resultado.empty else 0.0
         except Exception as exc:
-            print(f"Erro ao ler '{categoria}': {exc}")
+            logger.error(f"Erro ao ler '{categoria}': {exc}")
             return 0.0
 
     def _carregar_metricas_principais(self) -> None:
@@ -714,7 +716,7 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
             col = self._col_chave
             return self.dataframe[self.dataframe[col] == codigo].values[0, coluna]
         except Exception:
-            print(f"recuperar_valor_carteira: '{codigo}' não encontrado.")
+            logger.info(f"recuperar_valor_carteira: '{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_contas(
@@ -765,7 +767,7 @@ class CarteiraGenial(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             raise RuntimeError(f"Erro ao carregar dados da carteira Genial: {exc}") from exc
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
-        df = pd.read_excel(self.path_carteira, sheet_name=aba).reset_index(drop=True)
+        df = self.dataframe.reset_index(drop=True)
         categorias = {
             "contas_pagar": "VALORES A LIQUIDAR",
             "saldo_conta": "SALDOS EM CONTA CORRENTE",
@@ -838,7 +840,7 @@ class CarteiraQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             raise RuntimeError(f"Erro ao carregar dados da carteira QI: {exc}") from exc
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
-        df = pd.read_excel(self.path_carteira, sheet_name=aba).reset_index(drop=True)
+        df = self.dataframe.reset_index(drop=True)
         categorias = {
             "serie_emissao": "SÉRIES DE EMISSÃO",
             "titulos_publicos": "TÍTULOS PÚBLICOS",
@@ -884,7 +886,7 @@ class CarteiraQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             df = df.groupby("Unnamed: 2")[[coluna_valor]].sum()
             return df.values[0, 0]
         except Exception as exc:
-            print(f"Erro ao somar valores: {exc}")
+            logger.error(f"Erro ao somar valores: {exc}")
             return 0.0
 
 
@@ -1001,7 +1003,7 @@ class CarteiraMASTER(_MixinParseBRL, CarteiraBase):
             raise RuntimeError(f"Erro ao carregar dados da carteira Master: {exc}") from exc
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
-        return self._processar_pagina(self.path_carteira, "Page 2", "Unnamed: 1")
+        return self._processar_pagina(self.dataframe_2, "Unnamed: 1")
 
     # --- Helpers privados ---
 
@@ -1012,9 +1014,9 @@ class CarteiraMASTER(_MixinParseBRL, CarteiraBase):
             self.data = None
 
     def _processar_pagina(
-        self, path_excel: str, nome_planilha: str, coluna: str
+        self, df_origem: pd.DataFrame, coluna: str
     ) -> dict[str, pd.DataFrame]:
-        df = pd.read_excel(path_excel, sheet_name=nome_planilha).reset_index(drop=True)
+        df = df_origem.reset_index(drop=True)
         categorias = {
             "contas_pagar": "Contas a Pagar",
             "contas_receber": "Contas a Receber",
@@ -1039,7 +1041,7 @@ class CarteiraMASTER(_MixinParseBRL, CarteiraBase):
         try:
             return df[df["Unnamed: 1"] == codigo].values[0, coluna]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_valor_por_coluna(
@@ -1048,7 +1050,7 @@ class CarteiraMASTER(_MixinParseBRL, CarteiraBase):
         try:
             return df[df[coluna_codigo] == codigo].values[0, coluna_valor]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_valor_descricao(self, col_codigo: str, descricao: str, col_valor: int) -> float:
@@ -1146,14 +1148,14 @@ class CarteiraAVANTI(_MixinParseBRL, CarteiraBase):
             df = df.loc[:, ~df.columns.astype(str).str.lower().isin(["nan", ""])]
             return df[df["Descrição"].notna()]
         except Exception as exc:
-            print(f"Erro ao resetar cabeçalho Avanti: {exc}")
+            logger.error(f"Erro ao resetar cabeçalho Avanti: {exc}")
             return df
 
     def _recuperar_por_coluna(self, codigo: str, coluna_codigo: str, coluna_valor: int) -> Any:
         try:
             return self.dataframe[self.dataframe[coluna_codigo] == codigo].values[0, coluna_valor]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0
 
 
@@ -1203,7 +1205,7 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             raise RuntimeError(f"Erro ao carregar CarteiraSingulareQI: {exc}") from exc
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
-        df = pd.read_excel(self.path_carteira, sheet_name=aba).reset_index(drop=True)
+        df = self.dataframe.reset_index(drop=True)
         categorias_codigo = {
             "contas_pagar": "CPR",
             "outros_ativos": "OutrosAtivos",
@@ -1271,14 +1273,14 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
         try:
             return df[df[coluna_descricao] == codigo].values[0, coluna_valor]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0
 
     def somar_coluna_dataframe(self, codigo: str, coluna: str) -> float:
         try:
             return self._dataframes[codigo][coluna].sum()
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def salvar_novos_codigos(
@@ -1297,7 +1299,7 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             dados["CATEGORIA"] = "VALIDAR"
             ws.range(f"A{ultima_linha}").options(index=False, header=False).value = dados.values
             wb.save()
-            print(f"{len(novos_codigos)} novos códigos adicionados.")
+            logger.info(f"{len(novos_codigos)} novos códigos adicionados.")
         finally:
             app.quit()
 
@@ -1336,7 +1338,7 @@ class CarteiraPORTOFINO(_MixinParseBRL, CarteiraBase):
             raise RuntimeError(f"Erro ao carregar CarteiraPORTOFINO: {exc}") from exc
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
-        df = pd.read_excel(self.path_carteira, sheet_name="Page 2", engine="openpyxl").reset_index(drop=True)
+        df = self.dataframe_2.reset_index(drop=True)
         categorias = {
             "contas_pagar": "Contas a Pagar",
             "contas_receber": "Contas a Receber",
@@ -1371,7 +1373,7 @@ class CarteiraPORTOFINO(_MixinParseBRL, CarteiraBase):
         try:
             return df[df["Unnamed: 1"] == codigo].values[0, coluna]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_valor_por_coluna(
@@ -1380,7 +1382,7 @@ class CarteiraPORTOFINO(_MixinParseBRL, CarteiraBase):
         try:
             return df[df[coluna_codigo] == codigo].values[0, coluna_valor]
         except Exception:
-            print(f"'{codigo}' não encontrado.")
+            logger.info(f"'{codigo}' não encontrado.")
             return 0.0
 
     def recuperar_valor_descricao(self, col_codigo: str, descricao: str, col_valor: int) -> float:

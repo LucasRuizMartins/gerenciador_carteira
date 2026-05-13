@@ -4,21 +4,15 @@ import pandas as pd
 from Carteira import * 
 from funcoes_uteis import *
 
+from src.config.settings import configuracoes, resolver_path
+
 # --- Configuração e Helpers ---
 
-def carregar_config():
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(base_path, 'config.json')
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-CONFIG = carregar_config()
+CONFIG = configuracoes()
 
 def obter_path_absoluto(path_relativo):
-    """Resolve caminhos relativos ao root_dir do config.json de forma dinâmica pelo usuário."""
-    root = CONFIG['paths']['root_dir']
-    user_profile = os.environ.get('USERPROFILE', os.path.expanduser('~'))
-    return os.path.join(user_profile, root, path_relativo).replace('/', '\\')
+    """Resolve caminhos usando o novo sistema de settings."""
+    return resolver_path(path_relativo)
 
 def limpar_valor(valor):
     """Padroniza a limpeza de valores monetários."""

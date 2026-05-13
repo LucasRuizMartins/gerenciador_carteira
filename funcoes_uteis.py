@@ -17,6 +17,8 @@ Deprecated:
 """
 
 # --- Imports ---
+from src.core.logger import get_logger
+logger = get_logger(__name__)
 import time
 import re
 from datetime import datetime
@@ -46,16 +48,19 @@ def processar_dataframes(path_excel: str, aba: str = "CD_ATUAL") -> dict:
     Raises:
         RuntimeError: Se ocorrer falha durante o processamento das categorias.
     """
-    # Lê e prepara o DataFrame base (pula as primeiras 9 linhas de cabeçalho)
-    df = pd.read_excel(path_excel, sheet_name=aba).iloc[9:].reset_index(drop=True)
-    data_do_arquivo = pd.read_excel(path_excel, sheet_name=aba).iloc[3, 1]
+    # Lê a aba inteira uma única vez para melhorar performance
+    df_bruto = pd.read_excel(path_excel, sheet_name=aba)
+    
+    # Extrai a data e prepara o DataFrame base (pula as primeiras 9 linhas)
+    data_do_arquivo = df_bruto.iloc[3, 1]
+    df = df_bruto.iloc[9:].reset_index(drop=True)
     
     # Definir cabeçalhos
     try:
         df.columns = df.iloc[0]
         df = df.iloc[1:].reset_index(drop=True)
     except Exception as e:
-        print(f"Erro ao definir cabeçalhos: {str(e)}")
+        logger.error(f"Erro ao definir cabeçalhos: {str(e)}")
         df.columns = [f"Coluna_{i}" for i in range(len(df.columns))]
     
     # Função auxiliar para encontrar linhas de categorias
@@ -82,7 +87,7 @@ def processar_dataframes(path_excel: str, aba: str = "CD_ATUAL") -> dict:
         if linha is not None:
             linhas_categorias[key] = linha
         else:
-            print(f"Aviso: Categoria '{value}' não encontrada. Usando valor padrão.")
+            logger.warning(f"Aviso: Categoria '{value}' não encontrada. Usando valor padrão.")
             linhas_categorias[key] = len(df)  # Usa o final do DataFrame como fallback
     
     # Função auxiliar para resetar cabeçalho com verificação de segurança
@@ -93,7 +98,7 @@ def processar_dataframes(path_excel: str, aba: str = "CD_ATUAL") -> dict:
             df_temp.columns = df_temp.iloc[0]
             return df_temp.iloc[1:].reset_index(drop=True)
         except Exception as e:
-            print(f"Erro ao resetar cabeçalho: {str(e)}")
+            logger.error(f"Erro ao resetar cabeçalho: {str(e)}")
             return df_temp
     
     # Processar cada categoria com verificações de segurança
@@ -167,13 +172,13 @@ def processar_dataframes(path_excel: str, aba: str = "CD_ATUAL") -> dict:
             secoes_carteira['rentabilidade_acumulada'] = secoes_carteira['rentabilidade_acumulada'].rename(columns={"Indexador": "Código"})
             
     except Exception as e:
-        print(f"Erro durante o processamento das categorias: {str(e)}")
+        logger.error(f"Erro durante o processamento das categorias: {str(e)}")
         raise RuntimeError(f"Erro ao processar dataframes: {str(e)}")
     
     return secoes_carteira
 
 
-def categorizar_cota(dataframe, categoria):
+def categorizar_cota(dataframe: pd.DataFrame, categoria: str) -> float:
     """Retorna o PU Mercado de uma cota filtrada por categoria.
 
     Args:
@@ -186,13 +191,13 @@ def categorizar_cota(dataframe, categoria):
     try:
         return dataframe.loc[dataframe["CATEGORIA"] == categoria, "PU Mercado"].values[0, 0]
     except Exception as e:
-        print(f"Erro ao categorizar cota '{categoria}': {e}")
+        logger.error(f"Erro ao categorizar cota '{categoria}': {e}")
         return 0
 
 
 
 
-def gerar_df_dic_entre_linhas(carteira,dataframe, lista):
+def gerar_df_dic_entre_linhas(carteira: 'Any', dataframe: pd.DataFrame, lista: list[str]) -> dict:
     dicionario = {}
     for codigo in lista:
         dicionario[f"{codigo.lower()}"] = criar_df_entre_linhas_unico(dataframe, codigo)
@@ -235,7 +240,7 @@ def criar_df_entre_linhas_unico(df: pd.DataFrame, codigo: str, *args: str) -> pd
 
 
 
-def gerar_df_dic_agrupado(carteira,dataframe, lista):
+def gerar_df_dic_agrupado(carteira: 'Any', dataframe: pd.DataFrame, lista: list[str]) -> dict:
     dicionario = {}
     for codigo in lista:
         dicionario[f"{codigo.lower()}"] = agrupar_dataframe(dataframe, codigo,"Descrição")
@@ -271,17 +276,17 @@ def somar_valores_de_dicionario(
                 valor *= -1
             resultado += valor
         except (KeyError, IndexError, TypeError):
-            print(f"Código '{cod_lower}' não encontrado no dicionário.")
+            logger.info(f"Código '{cod_lower}' não encontrado no dicionário.")
     return resultado
 
 
-def extrair_valor_fundo_investimento(dataframe):
+def extrair_valor_fundo_investimento(dataframe: pd.DataFrame) -> float:
     try:
         df = dataframe.copy()
         if not df.empty:
             return df.iloc[0, 9]
     except IndexError:
-        print(f'Índice [0, 9] inválido para o DataFrame do código {dataframe}.')
+        logger.info(f'Índice [0, 9] inválido para o DataFrame do código {dataframe}.')
         return 0
     return 0 
 
@@ -299,13 +304,13 @@ def calcular_renda_fixa(dataframe: pd.DataFrame) -> float:
             dataframe.loc[dataframe["Código"] == "SUBTOTAL", "Valor Bruto"].values[0]
         )
     except (IndexError, KeyError, TypeError) as exc:
-        print(f"Erro ao recuperar subtotal da renda fixa: {exc}")
+        logger.error(f"Erro ao recuperar subtotal da renda fixa: {exc}")
         return 0.0
 
 
 # Carrega os dados da aba DICIONARIO_CATEGORIA 
 
-def salvar_novos_codigos(path, novos_codigos, nome_planilha="DICIONARIO_CATEGORIA"):
+def salvar_novos_codigos(path: str, novos_codigos: pd.DataFrame, nome_planilha: str = "DICIONARIO_CATEGORIA") -> None:
     import xlwings as xw
     
     if not novos_codigos.empty:
@@ -325,14 +330,14 @@ def salvar_novos_codigos(path, novos_codigos, nome_planilha="DICIONARIO_CATEGORI
             ws.range(f"A{ultima_linha}").options(index=False, header=False).value = dados_para_inserir.values
             
             wb.save()
-            print(f"{len(novos_codigos)} novos códigos adicionados com categoria 'VALIDAR'")
+            logger.info(f"{len(novos_codigos)} novos códigos adicionados com categoria 'VALIDAR'")
         finally:
             app.quit()
 
 
 
 
-def gerar_categoria_cotas(codigo, path_relatorio, dict_renda):
+def gerar_categoria_cotas(codigo: str, path_relatorio: str, dict_renda: dict) -> pd.DataFrame:
     """Gera o DataFrame final com categorias"""
     try:
         # Obtém dados já validados e com categorias
@@ -346,10 +351,10 @@ def gerar_categoria_cotas(codigo, path_relatorio, dict_renda):
         return df_validado[colunas].copy()
         
     except Exception as e:
-        print(f"ERRO em gerar_categoria_cotas: {str(e)}")
+        logger.error(f"ERRO em gerar_categoria_cotas: {str(e)}")
         return pd.DataFrame()
 
-def validar_categorias(codigo, path_relatorio, dict_renda):
+def validar_categorias(codigo: str, path_relatorio: str, dict_renda: dict) -> pd.DataFrame:
     """Valida categorias e salva novos códigos encontrados"""
     try:
         # 1. Carrega o dicionário de categorias existentes
@@ -374,7 +379,7 @@ def validar_categorias(codigo, path_relatorio, dict_renda):
         
         # 4. Se houver novos códigos, salva no arquivo
         if not novos_codigos.empty:
-            print(f"Encontrados {len(novos_codigos)} novos códigos")
+            logger.info(f"Encontrados {len(novos_codigos)} novos códigos")
             salvar_novos_codigos(path_relatorio, novos_codigos)
             
             # Atualiza o DataFrame de categorias existentes
@@ -393,7 +398,7 @@ def validar_categorias(codigo, path_relatorio, dict_renda):
         return df_completo
         
     except Exception as e:
-        print(f"ERRO em validar_categorias: {str(e)}")
+        logger.error(f"ERRO em validar_categorias: {str(e)}")
         return pd.DataFrame()
 
 
@@ -424,7 +429,7 @@ def encontrar_linha_categoria_legado(categoria: str, valores_procurados: list) -
     """
     lin = [v["linha"] for v in valores_procurados if v["nome"] == categoria]
     if not lin:
-        print(f"Linha não encontrada para categoria: {categoria}")
+        logger.info(f"Linha não encontrada para categoria: {categoria}")
         return [1]
     return lin
 
@@ -440,7 +445,7 @@ def resetar_cabecalho(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = df.iloc[0]
     return df.iloc[1:].reset_index(drop=True)
 
-def agrupar_dataframe(df,texto, coluna):
+def agrupar_dataframe(df: pd.DataFrame, texto: str, coluna: str) -> pd.DataFrame:
     #novo_df = df.copy()
     novo_df = df[df[coluna].str.contains(texto, case=False, na=False)].copy()
     #novo_df = novo_df[df_contas_pagar[coluna].str.contains(texto, case=False, na=False)]
@@ -449,7 +454,7 @@ def agrupar_dataframe(df,texto, coluna):
 
     return resultado 
 
-def agrupar_dataframe_varias_condicoes(df, texto, coluna, novo_texto, *args):
+def agrupar_dataframe_varias_condicoes(df: pd.DataFrame, texto: str, coluna: str, novo_texto: str, *args: str) -> pd.DataFrame:
     textos = [texto] + list(args)
     
     # Cria uma cópia do DataFrame para evitar modificar o original
@@ -468,7 +473,7 @@ def agrupar_dataframe_varias_condicoes(df, texto, coluna, novo_texto, *args):
     
     return resultado
 
-def agrupar_dataframe_codigo(df, lista_palavras_chave):
+def agrupar_dataframe_codigo(df: pd.DataFrame, lista_palavras_chave: list[str]) -> pd.DataFrame:
     """
     Substitui TODAS as descrições pelo código referente,
     classificando o restante como "Contas a pagar/receber" e agrupando.
@@ -494,7 +499,7 @@ def agrupar_dataframe_codigo(df, lista_palavras_chave):
     return resultado.sort_values('Valor')
 
 
-def encontrar_linha_codigo(df, codigo):
+def encontrar_linha_codigo(df: pd.DataFrame, codigo: str) -> 'int | None':
 
     linha = df.index[df['Código'] == codigo].tolist()
     return linha[0] if linha else None
@@ -518,21 +523,21 @@ def criar_df_entre_linhas(df: pd.DataFrame, codigo: str, *args: str) -> pd.DataF
 
 
 
-def salvar_para_csv(df, nome_arquivo="resultado.csv"):
+def salvar_para_csv(df: pd.DataFrame, nome_arquivo: str = "resultado.csv") -> None:
     try:
         df.to_csv(nome_arquivo, index=False, encoding='utf-8', sep=';', decimal=',')
-        print(f"Arquivo salvo com sucesso: {nome_arquivo}")
+        logger.info(f"Arquivo salvo com sucesso: {nome_arquivo}")
     except Exception as e:
-        print(f"Erro ao salvar o arquivo CSV: {e}")
+        logger.error(f"Erro ao salvar o arquivo CSV: {e}")
 
-def salvar_excel(df,nome_arquivo="resultado.xlsx"):
+def salvar_excel(df: pd.DataFrame, nome_arquivo: str = "resultado.xlsx") -> None:
     try:
         df.to_excel(nome_arquivo, index=False)
-        print(f"Arquivo salvo com sucesso: {nome_arquivo}")
+        logger.info(f"Arquivo salvo com sucesso: {nome_arquivo}")
     except Exception as e:
-        print(f"Erro ao salvar o arquivo EXCEL: {e}")
+        logger.error(f"Erro ao salvar o arquivo EXCEL: {e}")
 
-def ajustar_formula(formula, linha_atual):
+def ajustar_formula(formula: str, linha_atual: int) -> str:
     # Regex para encontrar referências de células (ex: A1, B2, C3)
     padrao = re.compile(r'([A-Za-z]+)(\d+)')
     
@@ -550,12 +555,12 @@ def ajustar_formula(formula, linha_atual):
 
 
 
-def verificar_aba(wb, nome_aba):
+def verificar_aba(wb: 'Any', nome_aba: str) -> None:
     """Verifica se a aba existe na pasta de trabalho."""
     if nome_aba not in [sheet.name for sheet in wb.sheets]:
         raise ValueError(f"Planilha '{nome_aba}' não encontrada!")
 
-def processar_aba(wb, nome_aba, mapeamento):
+def processar_aba(wb: 'Any', nome_aba: str, mapeamento: list[dict]) -> None:
     """Processa uma aba específica com o mapeamento fornecido."""
     ws = wb.sheets[nome_aba]
     
@@ -574,7 +579,7 @@ def processar_aba(wb, nome_aba, mapeamento):
                 ws.range(ultima_linha, col).value = item["Valor"]
                 break
 
-def salvar_carteira_diaria(path, mapeamento_excel_cd, mapeamento_excel_mec):
+def salvar_carteira_diaria(path: str, mapeamento_excel_cd: list[dict], mapeamento_excel_mec: list[dict]) -> None:
     """Função principal para salvar dados nas abas CD e MEC."""
     app = xw.App(visible=False)
     try:
@@ -594,29 +599,29 @@ def salvar_carteira_diaria(path, mapeamento_excel_cd, mapeamento_excel_mec):
         processar_aba(wb, "MEC", mapeamento_excel_mec)
         
         wb.save()
-        print("Dados salvos com sucesso nas abas CD e MEC!")
+        logger.info("Dados salvos com sucesso nas abas CD e MEC!")
         
     except Exception as e:
-        print(f"Erro durante o processamento: {str(e)}")
+        logger.error(f"Erro durante o processamento: {str(e)}")
         if 'wb' in locals():
             wb.close()
     finally:
         app.quit()
 
 
-def calcular_valor_cota(df_categoria, categoria):
+def calcular_valor_cota(df_categoria: pd.DataFrame, categoria: str) -> float:
     cota_filtrada = df_categoria[df_categoria["CATEGORIA"] == categoria].copy()
     if cota_filtrada.empty:
-        print(f"Aviso: Categoria '{categoria}' não encontrada.")
+        logger.warning(f"Aviso: Categoria '{categoria}' não encontrada.")
         return None
     valor_liquido = cota_filtrada["Valor Líquido"].sum()
     return valor_liquido
 
 
-def calcular_qtd_cota(df_categoria, categoria):
+def calcular_qtd_cota(df_categoria: pd.DataFrame, categoria: str) -> float:
     cota_filtrada = df_categoria[df_categoria["CATEGORIA"] == categoria].copy()
     if cota_filtrada.empty:
-        print(f"Aviso: Categoria '{categoria}' não encontrada.")
+        logger.warning(f"Aviso: Categoria '{categoria}' não encontrada.")
         return 0
     valor_liquido = cota_filtrada["Quantidade"].sum()
     return valor_liquido

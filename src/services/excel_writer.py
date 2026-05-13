@@ -23,6 +23,8 @@ Uso:
 """
 
 from __future__ import annotations
+from src.core.logger import get_logger
+logger = get_logger(__name__)
 
 import time
 from abc import ABC, abstractmethod
@@ -138,7 +140,7 @@ class ExcelWriter:
             self._escrever_aba(wb.sheets["MEC"], mapeamento_mec)
 
             wb.save()
-            print(f"✔ Dados salvos com sucesso em: {path}")
+            logger.info(f"✔ Dados salvos com sucesso em: {path}")
 
         except Exception as exc:
             raise RuntimeError(
@@ -176,7 +178,7 @@ class ExcelWriter:
             self._verificar_aba(wb, aba)
             self._escrever_aba(wb.sheets[aba], mapeamento)
             wb.save()
-            print(f"✔ Aba '{aba}' salva em: {path}")
+            logger.info(f"✔ Aba '{aba}' salva em: {path}")
         except Exception as exc:
             raise RuntimeError(f"Falha ao salvar aba '{aba}': {exc}") from exc
         finally:
@@ -211,7 +213,7 @@ class ExcelWriter:
                 index=False, header=False
             ).value = dados.values
             wb.save()
-            print(f"✔ {len(novos_codigos)} novo(s) código(s) adicionado(s) ao dicionário.")
+            logger.info(f"✔ {len(novos_codigos)} novo(s) código(s) adicionado(s) ao dicionário.")
         finally:
             app.quit()
 

@@ -1,3 +1,5 @@
+from src.core.logger import get_logger
+logger = get_logger(__name__)
 import os
 import sys
 import threading
@@ -8,20 +10,20 @@ from carteira_apex import obter_path_absoluto, CONFIG
 from src.registry import REGISTRO, processar_fundo_registrado
 
 def listar_fundos():
-    print("\n--- FUNDOS DISPONÍVEIS ---")
+    logger.info("\n--- FUNDOS DISPONÍVEIS ---")
     for i, fundo in enumerate(REGISTRO.keys(), 1):
-        print(f"{i}. {fundo}")
-    print("--------------------------\n")
+        logger.info(f"{i}. {fundo}")
+    logger.info("--------------------------\n")
 
 def executar(nome_fundo, aba="CD_ATUAL"):
     try:
         nome_fundo = nome_fundo.upper().strip()
         
         if nome_fundo not in REGISTRO:
-            print(f"Erro: Fundo '{nome_fundo}' não encontrado no REGISTRO.")
+            logger.error(f"Erro: Fundo '{nome_fundo}' não encontrado no REGISTRO.")
             return False
 
-        print(f"\n>>> Iniciando processamento: {nome_fundo} na aba {aba}")
+        logger.info(f"\n>>> Iniciando processamento: {nome_fundo} na aba {aba}")
         
         # Executa a função de geração via registro
         processar_fundo_registrado(nome_fundo, aba=aba)
@@ -31,14 +33,44 @@ def executar(nome_fundo, aba="CD_ATUAL"):
             rel_filename = CONFIG['arquivo_gerencial'].get(nome_fundo)
             if rel_filename:
                 rel_path = obter_path_absoluto(os.path.join(CONFIG['paths']['relatorio_diario'], rel_filename))
-                print(f"✔ Relatório concluído: {rel_path}")
+                logger.info(f"✔ Relatório concluído: {rel_path}")
         except:
             pass
         return True
 
     except Exception as e:
-        print(f"❌ Falha ao processar {nome_fundo}: {e}")
+        logger.error(f"❌ Falha ao processar {nome_fundo}: {e}")
         raise e
+
+def _executar_batch(abas_dict, status_label):
+    def task():
+        sucessos = []
+        erros = []
+        for fundo, aba in abas_dict.items():
+            try:
+                status_label.config(text=f"Processando {fundo} ({aba})...", fg="blue")
+                if executar(fundo, aba):
+                    sucessos.append(fundo)
+            except Exception as e:
+                erros.append(f"{fundo} ({aba}): {str(e)}")
+        
+        # Relatório consolidado
+        msg = f"Processamento Batch Finalizado!\n\nSucesso: {len(sucessos)}\nFalhas: {len(erros)}"
+        if erros:
+            logger.error("--- RELATÓRIO CONSOLIDADO DE ERROS ---")
+            for erro in erros:
+                logger.error(erro)
+            logger.error("--------------------------------------")
+            msg += "\n\nErros (veja o log para detalhes):\n" + "\n".join(erros[:5])
+            if len(erros) > 5:
+                msg += f"\n... e mais {len(erros)-5} erros."
+            status_label.config(text=f"Batch finalizado com erros.", fg="red")
+            messagebox.showwarning("Relatório Batch", msg)
+        else:
+            status_label.config(text=f"Batch finalizado com 100% de sucesso.", fg="green")
+            messagebox.showinfo("Relatório Batch", msg)
+
+    threading.Thread(target=task, daemon=True).start()
 
 def _executar_gui(nome_fundo, aba, status_label):
     def task():
@@ -167,9 +199,21 @@ def iniciar_interface():
             col = 0
             row += 1
 
-    # Botão Sair
-    btn_sair = ttk.Button(root, text="Sair", command=root.destroy)
-    btn_sair.pack(pady=15)
+    # Botão Sair e Batch
+    frame_rodape = tk.Frame(root)
+    frame_rodape.pack(pady=15, fill=tk.X, padx=20)
+    
+    def on_batch():
+        # Por padrão usa CD_ATUAL para todos os fundos
+        abas_dict = {f: "CD_ATUAL" for f in REGISTRO.keys()}
+        if messagebox.askyesno("Processar Todos", f"Isso irá processar todos os {len(REGISTRO)} fundos usando a aba CD_ATUAL.\nConfirma?"):
+            _executar_batch(abas_dict, status_label)
+            
+    btn_batch = ttk.Button(frame_rodape, text="Processar Todos", command=on_batch)
+    btn_batch.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=5)
+
+    btn_sair = ttk.Button(frame_rodape, text="Sair", command=root.destroy)
+    btn_sair.pack(side=tk.RIGHT, expand=True, fill=tk.X, padx=5)
 
     root.mainloop()
 

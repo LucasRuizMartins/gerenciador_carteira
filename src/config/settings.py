@@ -25,133 +25,114 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+from pydantic import BaseModel, Field, field_validator
+
 
 # ---------------------------------------------------------------------------
-# Constantes
+# Carregamento de Ambiente
 # ---------------------------------------------------------------------------
 
-_CONFIG_FILENAME = "config.json"
+# Resolve sempre relativo à raiz do projeto (dois níveis acima de src/config/)
+RAIZ_PROJETO = Path(__file__).resolve().parent.parent.parent
+load_dotenv(RAIZ_PROJETO / ".env")
+
+
+# ---------------------------------------------------------------------------
+# Schemas de Validação (Pydantic)
+# ---------------------------------------------------------------------------
+
+class PathsConfig(BaseModel):
+    root_dir: str = Field(default_factory=lambda: os.getenv("ROOT_DIR", ""))
+    relatorio_diario: str
+    estoque: str
+    feriados: str
+
+class FundoConfigItem(BaseModel):
+    contas_pagar: list[str]
+
+class AppSettings(BaseModel):
+    """Schema completo do config.json validado pelo Pydantic."""
+    paths: PathsConfig
+    arquivo_gerencial: dict[str, str]
+    laminas: dict[str, str]
+    carteiras: dict[str, str]
+    configuracoes_fundos: dict[str, FundoConfigItem]
+    destinatarios: list[str]
+
+    @field_validator("paths")
+    @classmethod
+    def validar_root_dir(cls, v: PathsConfig) -> PathsConfig:
+        if not v.root_dir:
+            v.root_dir = os.getenv("ROOT_DIR", "")
+        if not v.root_dir:
+            raise ValueError("ROOT_DIR deve estar definido no .env ou no config.json")
+        return v
 
 
 # ---------------------------------------------------------------------------
 # Carregamento e cache
 # ---------------------------------------------------------------------------
 
-
 @lru_cache(maxsize=1)
-def configuracoes() -> dict[str, Any]:
-    """Carrega e cacheia o arquivo config.json.
-
-    O cache garante que o arquivo é lido apenas uma vez por execução,
-    mesmo que a função seja chamada múltiplas vezes.
-
-    Returns:
-        dict: Dicionário completo com todas as configurações do sistema.
-
-    Raises:
-        FileNotFoundError: Se config.json não for encontrado.
-        json.JSONDecodeError: Se o arquivo estiver malformado.
-    """
-    # Resolve sempre relativo à raiz do projeto (dois níveis acima de src/config/)
-    raiz_projeto = Path(__file__).resolve().parent.parent.parent
-    config_path = raiz_projeto / _CONFIG_FILENAME
+def configuracoes_validadas() -> AppSettings:
+    """Carrega o config.json e valida contra o schema Pydantic."""
+    config_path = RAIZ_PROJETO / "config.json"
 
     if not config_path.exists():
-        raise FileNotFoundError(
-            f"Arquivo de configuração não encontrado: {config_path}\n"
-            "Certifique-se de que config.json está na raiz do projeto."
-        )
+        raise FileNotFoundError(f"Arquivo config.json não encontrado em {config_path}")
 
     with config_path.open(encoding="utf-8") as f:
-        return json.load(f)
+        dados = json.load(f)
+    
+    return AppSettings(**dados)
+
+def configuracoes() -> dict[str, Any]:
+    """Mantém compatibilidade com o código legado retornando um dict."""
+    return configuracoes_validadas().model_dump()
 
 
 def invalidar_cache() -> None:
-    """Invalida o cache de configurações.
-
-    Útil em testes unitários que precisam trocar a configuração
-    entre casos de teste.
-    """
-    configuracoes.cache_clear()
+    """Invalida o cache de configurações."""
+    configuracoes_validadas.cache_clear()
 
 
 # ---------------------------------------------------------------------------
 # Resolução de caminhos
 # ---------------------------------------------------------------------------
 
-
 def resolver_path(path_relativo: str) -> str:
-    """Resolve um caminho relativo ao diretório raiz do usuário.
-
-    Combina USERPROFILE (Windows) com o root_dir definido em config.json
-    e o path_relativo fornecido.
-
-    Args:
-        path_relativo: Caminho relativo à raiz dos documentos Carmel Capital
-            (ex: "01 - OPERACIONAL/CONTROLADORIA/...").
-
-    Returns:
-        str: Caminho absoluto normalizado para o sistema operacional atual.
-
-    Example:
-        >>> path = resolver_path(configuracoes()["carteiras"]["FIDARA"])
-        >>> # C:\\Users\\Nowtek\\Carmel Capital\\...\\FIDARA.xlsb
-    """
-    cfg = configuracoes()
-    root_dir: str = cfg["paths"]["root_dir"]
+    """Resolve um caminho absoluto normalizado."""
+    cfg = configuracoes_validadas()
+    root_dir = cfg.paths.root_dir
     perfil_usuario = os.environ.get("USERPROFILE", os.path.expanduser("~"))
 
-    # Usa pathlib para normalizar separadores independente do SO
     return str(Path(perfil_usuario) / root_dir / path_relativo)
 
 
 def resolver_path_relatorio(chave_fundo: str) -> str:
-    """Resolve o caminho absoluto do arquivo de relatório gerencial de um fundo.
-
-    Args:
-        chave_fundo: Chave do fundo em config.json['arquivo_gerencial']
-            (ex: "FIDARA", "CDC").
-
-    Returns:
-        str: Caminho absoluto do arquivo .xlsb do relatório gerencial.
-
-    Raises:
-        KeyError: Se a chave_fundo não existir em config.json['arquivo_gerencial'].
-    """
-    cfg = configuracoes()
-    nome_arquivo: str = cfg["arquivo_gerencial"][chave_fundo]
-    diretorio_relatorio: str = cfg["paths"]["relatorio_diario"]
+    """Resolve o caminho absoluto do arquivo de relatório gerencial."""
+    cfg = configuracoes_validadas()
+    if chave_fundo not in cfg.arquivo_gerencial:
+        raise KeyError(f"Fundo '{chave_fundo}' não mapeado em 'arquivo_gerencial'")
+    
+    nome_arquivo = cfg.arquivo_gerencial[chave_fundo]
+    diretorio_relatorio = cfg.paths.relatorio_diario
     return resolver_path(str(Path(diretorio_relatorio) / nome_arquivo))
 
 
 def resolver_path_carteira(chave_fundo: str) -> str:
-    """Resolve o caminho absoluto da carteira diária de um fundo.
-
-    Args:
-        chave_fundo: Chave do fundo em config.json['carteiras']
-            (ex: "FIDARA", "CDC").
-
-    Returns:
-        str: Caminho absoluto do arquivo Excel da carteira diária.
-
-    Raises:
-        KeyError: Se a chave_fundo não existir em config.json['carteiras'].
-    """
-    cfg = configuracoes()
-    path_relativo: str = cfg["carteiras"][chave_fundo]
+    """Resolve o caminho absoluto da carteira diária."""
+    cfg = configuracoes_validadas()
+    if chave_fundo not in cfg.carteiras:
+        raise KeyError(f"Fundo '{chave_fundo}' não mapeado em 'carteiras'")
+        
+    path_relativo = cfg.carteiras[chave_fundo]
     return resolver_path(path_relativo)
 
 
 def obter_contas_pagar_fundo(chave_fundo: str) -> list[str]:
-    """Retorna a lista de palavras-chave de contas a pagar de um fundo.
-
-    Args:
-        chave_fundo: Chave do fundo em config.json['configuracoes_fundos'].
-
-    Returns:
-        list[str]: Lista de categorias de contas a pagar.
-            Retorna lista vazia se o fundo não tiver configuração.
-    """
-    cfg = configuracoes()
-    fundo_cfg = cfg.get("configuracoes_fundos", {}).get(chave_fundo, {})
-    return fundo_cfg.get("contas_pagar", [])
+    """Retorna a lista de palavras-chave de contas a pagar."""
+    cfg = configuracoes_validadas()
+    fundo_cfg = cfg.configuracoes_fundos.get(chave_fundo)
+    return fundo_cfg.contas_pagar if fundo_cfg else []
