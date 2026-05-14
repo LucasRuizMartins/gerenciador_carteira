@@ -35,6 +35,7 @@ from src.core.logger import get_logger
 from src.config.schemas import MapeamentoFundo, ItemMapeamento
 from src.services.mapping_engine import MappingEngine, MapeamentoExcel, CustomResolver
 from Carteira import CarteiraBase
+import pandas as pd
 
 logger = get_logger(__name__)
 
@@ -57,6 +58,119 @@ class ConfigDrivenBuilder:
     def __init__(self, config: MapeamentoFundo, engine: MappingEngine | None = None) -> None:
         self._config = config
         self._engine = engine or MappingEngine()
+        self._registrar_funcoes_paridade()
+
+    def _registrar_funcoes_paridade(self) -> None:
+        """Registra funções para manter paridade com lógicas complexas dos builders legados."""
+        
+        # --- Helpers para simular itens de mapeamento ---
+        class FakeItem:
+            def __init__(self, **kwargs):
+                for k, v in kwargs.items(): setattr(self, k, v)
+
+        # --- Lógica CDC ---
+        def resolver_pdd_cdc(c, _):
+            return c.pdd + c.recuperar_valor_carteira("PERDA ESPERADA", 1)
+        
+        def resolver_outros_valores_cdc(c, _):
+            cvm = self._engine._resolver_contas(c, FakeItem(filtro='Cvm', dataframe='df_contas_receber_filtrado'))
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a receber', dataframe='df_contas_receber_filtrado'))
+            return cvm + contas
+
+        # --- Lógica CARMEL_II ---
+        def resolver_mez_a_carmel_ii(c, _):
+            return c.recuperar_valor_carteira("RESIDENCE CLUB FIDC - MEZ A", 5) + \
+                   c.recuperar_valor_carteira("FIDC BRL2954 - RESIDENCE CLUB FIDC : FIDC BRL2954 - RESIDENCE CLUB FIDC - MZ A", 5)
+
+        def resolver_mez_b_carmel_ii(c, _):
+            return c.recuperar_valor_carteira("RESIDENCE CLUB FIDC - MEZ B", 5) + \
+                   c.recuperar_valor_carteira("FIDC BRL2954 - RESIDENCE CLUB FIDC : FIDC BRL2954 - RESIDENCE CLUB FIDC - MZ B", 5)
+
+        def resolver_outras_despesas_carmel_ii(c, _):
+            cetip = self._engine._resolver_contas(c, FakeItem(filtro='Cetip', dataframe='df_contas_filtrado'))
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a pagar', dataframe='df_contas_filtrado'))
+            return cetip + contas
+
+        # --- Lógica ENEL ---
+        def resolver_pdd_enel(c, _):
+            return c.recuperar_valor_carteira("PDD", 1) + c.recuperar_valor_carteira("PERDA ESPERADA", 1)
+
+        def resolver_itau_enel(c, _):
+            try:
+                # Busca direta no dataframe da carteira
+                mask = c.dataframe["Carteira"] == "FICFI ITAU SOBERANO RF SIMP LP"
+                return c.dataframe.loc[mask].values[0, 5]
+            except: return 0
+
+        def resolver_outras_despesas_enel(c, _):
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a pagar', dataframe='df_contas_filtrado'))
+            anbima = self._engine._resolver_contas(c, FakeItem(filtro='Anbima', dataframe='df_contas_filtrado'))
+            return contas + anbima
+
+        def resolver_outros_valores_enel(c, _):
+            anbima = self._engine._resolver_contas(c, FakeItem(filtro='Anbima', dataframe='df_contas_receber_filtrado'))
+            cvm = self._engine._resolver_contas(c, FakeItem(filtro='Cvm', dataframe='df_contas_receber_filtrado'))
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a receber', dataframe='df_contas_receber_filtrado'))
+            return anbima + cvm + contas
+
+        # --- Lógica MOOVPAY ---
+        def resolver_dif_cvm_moovpay(c, _):
+            df = c.df_contas_receber
+            try: return df[df["Histórico"].str.contains("Cvm", na=False, case=False)]["Valor Total"].sum()
+            except: return 0
+
+        def resolver_dif_anbima_moovpay(c, _):
+            df = c.df_contas_receber
+            try: return df[df["Histórico"].str.contains("Anbima", na=False, case=False)]["Valor Total"].sum()
+            except: return 0
+
+        def resolver_banco_liq_moovpay(c, _):
+            try:
+                mask = c.dataframe["Unnamed: 2"].str.contains("banco liquidante", case=False, na=False)
+                return float(c.dataframe.loc[mask, "Unnamed: 4"].iloc[0])
+            except: return 0
+
+        def resolver_outros_receber_moovpay(c, _):
+            dif_cvm = resolver_dif_cvm_moovpay(c, None)
+            return c.outros_valores_receber - dif_cvm
+
+        def resolver_outras_despesas_moovpay(c, _):
+            banco_liq = resolver_banco_liq_moovpay(c, None)
+            return c.outros_valores_pagar - banco_liq
+
+        # --- Lógica RESIDENCE ---
+        def resolver_ilha_do_sol_residence(c, _):
+            return sum(c.recuperar_valor_carteira(f"NC_ILHADOSOL{suffix}", 10) 
+                       for suffix in ["", "_2T", "_3T", "_4T", "_5T", "_6T", "_7T", "_8T", "_9T", "_10T"])
+
+        def resolver_outras_despesas_residence(c, _):
+            cvm = self._engine._resolver_contas(c, FakeItem(filtro='Cvm', dataframe='df_contas_filtrado'))
+            return c.outros_valores_pagar + cvm
+
+        def resolver_outros_valores_residence(c, _):
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a receber', dataframe='df_contas_receber_filtrado'))
+            gestao = self._engine._resolver_contas(c, FakeItem(filtro='Gestão', dataframe='df_contas_receber_filtrado'))
+            return contas + gestao
+
+        # Registro em lote no motor
+        reg = self.registrar_custom
+        reg("resolver_pdd_cdc", resolver_pdd_cdc)
+        reg("resolver_outros_valores_cdc", resolver_outros_valores_cdc)
+        reg("resolver_mez_a_carmel_ii", resolver_mez_a_carmel_ii)
+        reg("resolver_mez_b_carmel_ii", resolver_mez_b_carmel_ii)
+        reg("resolver_outras_despesas_carmel_ii", resolver_outras_despesas_carmel_ii)
+        reg("resolver_pdd_enel", resolver_pdd_enel)
+        reg("resolver_itau_enel", resolver_itau_enel)
+        reg("resolver_outras_despesas_enel", resolver_outras_despesas_enel)
+        reg("resolver_outros_valores_enel", resolver_outros_valores_enel)
+        reg("resolver_dif_cvm_moovpay", resolver_dif_cvm_moovpay)
+        reg("resolver_dif_anbima_moovpay", resolver_dif_anbima_moovpay)
+        reg("resolver_banco_liq_moovpay", resolver_banco_liq_moovpay)
+        reg("resolver_outros_receber_moovpay", resolver_outros_receber_moovpay)
+        reg("resolver_outras_despesas_moovpay", resolver_outras_despesas_moovpay)
+        reg("resolver_ilha_do_sol_residence", resolver_ilha_do_sol_residence)
+        reg("resolver_outras_despesas_residence", resolver_outras_despesas_residence)
+        reg("resolver_outros_valores_residence", resolver_outros_valores_residence)
 
     # ------------------------------------------------------------------
     # Construtores alternativos

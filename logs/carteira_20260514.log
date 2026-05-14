@@ -1,0 +1,6 @@
+2026-05-14 13:10:47 - __main__ - INFO - 
+>>> Iniciando processamento: CDC na aba CD_ATUAL
+2026-05-14 13:10:57 - __main__ - ERROR - ❌ Falha ao processar CDC: (-2146777998, 'OLE error 0x800ac472', None, None)
+2026-05-14 13:11:17 - __main__ - INFO - 
+>>> Iniciando processamento: CDC na aba CD_ATUAL
+2026-05-14 13:11:29 - __main__ - INFO - ✔ Relatório concluído: C:\Users\Nowtek\Carmel Capital\Arquivos - Documentos\00 - CARMEL ASSET\01 - OPERACIONAL\CONTROLADORIA\01 - Relatorios Diarios\Relatorios Diarios\CDC EMPRESTIMOS FIDC.xlsb

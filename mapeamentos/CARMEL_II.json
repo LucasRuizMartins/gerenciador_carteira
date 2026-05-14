@@ -1,0 +1,41 @@
+{
+  "versao": "1.0",
+  "fundo": "CARMEL_II",
+  "administradora": "BRL",
+  "mapeamento_cd": [
+    {"categoria": "Data-Base", "fonte": "atributo", "campo": "data"},
+    {"categoria": "Residence Club - Senior 3", "fonte": "valor_carteira", "chave_etl": "FIDC BRL2954 - RESIDENCE CLUB FIDC : FIDC BRL2954 - RESIDENCE CLUB FIDC - SR 03", "coluna": 5},
+    {"categoria": "Residence Club - Mezanino A", "fonte": "custom", "nome_funcao": "resolver_mez_a_carmel_ii"},
+    {"categoria": "Residence Club - Mezanino B2", "fonte": "custom", "nome_funcao": "resolver_mez_b_carmel_ii"},
+    {"categoria": "CDC - Sênior", "fonte": "valor_carteira", "chave_etl": "FIDC BRL2830 - CDC EMPRESTIMOS FIDC DE CLASSE ÚNICA FECHADA SEN", "coluna": 5},
+    {"categoria": "SB Crédito - Mezanino H", "fonte": "valor_carteira", "chave_etl": "SB CREDITO FIDC MULTISETORIAL MEZ H", "coluna": 5},
+    {"categoria": "SB Crédito - Mezanino D", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Carmel FIC FIDC", "fonte": "valor_carteira", "chave_etl": "CARMEL FIC FIDC", "coluna": 5},
+    {"categoria": "Direitos Creditórios a Vencer - NC Moovpay", "fonte": "valor_carteira", "chave_etl": "Total NC-PRÉ:", "coluna": 10},
+    {"categoria": "CRI REIT", "fonte": "valor_carteira", "chave_etl": "CRI_25B2384188", "coluna": 10},
+    {"categoria": "BRL FIRF DI LP", "fonte": "atributo", "campo": "valor_di"},
+    {"categoria": "NTN-B ", "fonte": "valor_carteira", "chave_etl": "NTNB20600815 - 760199", "coluna": 10},
+    {"categoria": "Taxa de Administração", "fonte": "taxa", "campo": "valor_administracao"},
+    {"categoria": "Taxa de Gestão", "fonte": "taxa", "campo": "valor_taxa_gestao"},
+    {"categoria": "Taxa de Auditoria", "fonte": "taxa", "campo": "valor_taxa_auditoria"},
+    {"categoria": "Taxa Fisc. CVM", "fonte": "taxa", "campo": "valor_taxa_cvm"},
+    {"categoria": "Taxa ANBIMA", "fonte": "contas", "filtro": "Anbima"},
+    {"categoria": "Outras despesas  (-)", "fonte": "custom", "nome_funcao": "resolver_outras_despesas_carmel_ii"},
+    {"categoria": "Dif. de despesa CVM ", "fonte": "contas", "filtro": "Cvm", "dataframe": "df_contas_receber_filtrado"},
+    {"categoria": "Dif. de despesa ANBIMA", "fonte": "contas", "filtro": "Anbima", "dataframe": "df_contas_receber_filtrado"},
+    {"categoria": "Outros valores a receber  (+)", "fonte": "contas", "filtro": "Contas a receber", "dataframe": "df_contas_receber_filtrado"},
+    {"categoria": "Senior (-)", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Mezanino (-)", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "PL Carteira Subordinada", "fonte": "atributo", "campo": "patrimonio_total"}
+  ],
+  "mapeamento_mec": [
+    {"categoria": "DATA", "fonte": "atributo", "campo": "data"},
+    {"categoria": "VALOR DE APLICAÇÃO", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "COTAS EMITIDAS", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "VALOR DE RESGATE ", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "COTAS RESGATADAS", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "QUANT COTAS", "fonte": "valor_carteira", "chave_etl": "Qtde. Cota", "coluna": 1},
+    {"categoria": "VALOR DA COTA CARMEL II FIDC", "fonte": "valor_carteira", "chave_etl": "Valor da Cota Líquida", "coluna": 1},
+    {"categoria": "AMORTIZ. DIA", "fonte": "fixo", "valor_fixo": 0}
+  ]
+}

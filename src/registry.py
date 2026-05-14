@@ -102,68 +102,77 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
     # -----------------------------------------------------------------------
     # Fundos com Administradora BRL
     # -----------------------------------------------------------------------
+    # ✅ Fase 1 — Migrado para config-driven
     "FIDARA": ConfiguracaoFundo(
         nome="FIDARA FIDC",
         chave_carteira="FIDARA",
         chave_gerencial="FIDARA",
         classe_carteira=CarteiraBRL,
-        builder=FidaraReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("FIDARA.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "CDC": ConfiguracaoFundo(
         nome="CDC EMPRESTIMOS FIDC",
         chave_carteira="CDC",
         chave_gerencial="CDC",
         classe_carteira=CarteiraBRL,
-        builder=CdcReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("CDC.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "CARMEL_II": ConfiguracaoFundo(
         nome="CARMEL II FIDC",
         chave_carteira="CARMEL_II",
         chave_gerencial="CARMEL_II",
         classe_carteira=CarteiraBRL,
-        builder=CarmelIIReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("CARMEL_II.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "GERAR": ConfiguracaoFundo(
         nome="GERAR CAPITAL FIDC",
         chave_carteira="GERAR",
         chave_gerencial="GERAR",
         classe_carteira=CarteiraBRL,
-        builder=GerarReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("GERAR.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "ENEL": ConfiguracaoFundo(
         nome="ENEL II FIDC",
         chave_carteira="ENEL",
         chave_gerencial="ENEL",
         classe_carteira=CarteiraBRL,
-        builder=EnelReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("ENEL.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "HOUSI": ConfiguracaoFundo(
         nome="HOUSI FIDC",
         chave_carteira="HOUSI",
         chave_gerencial="HOUSI",
         classe_carteira=CarteiraBRL,
-        builder=HousiReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("HOUSI.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "INFRA": ConfiguracaoFundo(
         nome="INFRA PORTFOLIO I",
         chave_carteira="INFRA",
         chave_gerencial="INFRA",
         classe_carteira=CarteiraBRL,
-        builder=InfraReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("INFRA.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "MOOVPAY": ConfiguracaoFundo(
         nome="MOOVPAY",
         chave_carteira="MOOVPAY",
         chave_gerencial="MOOVPAY",
         classe_carteira=CarteiraBRL,
-        builder=MoovpayReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("MOOVPAY.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "RESIDENCE": ConfiguracaoFundo(
         nome="RESIDENCE CLUB FIDC",
         chave_carteira="RESIDENCE",
         chave_gerencial="RESIDENCE",
         classe_carteira=CarteiraBRL,
-        builder=ResidenceReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("RESIDENCE.json"),
     ),
     "SB_II": ConfiguracaoFundo(
         nome="SB MULTIESTRATEGIA II",
@@ -181,12 +190,13 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         classe_carteira=CarteiraBRL,
         builder=lambda: ConfigDrivenBuilder.de_arquivo("ZULU.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "VIRTUS": ConfiguracaoFundo(
         nome="VIRTUS CAPITAL",
         chave_carteira="VIRTUS",
         chave_gerencial="VIRTUS",
         classe_carteira=CarteiraBRL,
-        builder=VirtusReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("VIRTUS.json"),
     ),
     # ✅ Fase 1 — Migrado para config-driven
     "CREDITOS_COLATERALIZADOS": ConfiguracaoFundo(

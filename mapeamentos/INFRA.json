@@ -1,0 +1,40 @@
+{
+  "versao": "1.0",
+  "fundo": "INFRA",
+  "administradora": "BRL",
+  "mapeamento_cd": [
+    {"categoria": "Data-Base", "fonte": "atributo", "campo": "data"},
+    {"categoria": "Belluno - Senior 2", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Infra Setorial FIP Multiestregia", "fonte": "valor_carteira", "chave_etl": "INFRA SETORIAL FIP", "coluna": 5},
+    {"categoria": "Saldo em Tesouraria", "fonte": "atributo", "campo": "saldo_tesouraria"},
+    {"categoria": "CONASA", "fonte": "valor_carteira", "chave_etl": "CONASA S.A.", "coluna": 8},
+    {"categoria": "LFT", "fonte": "valor_carteira", "chave_etl": "LFT20290901 - 210100", "coluna": 10},
+    {"categoria": "Itaú Soberano", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "RJI Cash FI RF", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Carmel FIC de FIDC", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "BRADESCO", "fonte": "valor_carteira", "chave_etl": "CORPORATE RF SIMPLES", "coluna": 5},
+    {"categoria": "NTN-B", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "PL Carteira  Digitar", "fonte": "atributo", "campo": "patrimonio_total"},
+    {"categoria": "Taxa de Administração", "fonte": "taxa", "campo": "valor_administracao"},
+    {"categoria": "Taxa de Custódia", "fonte": "taxa", "campo": "valor_taxa_custodia"},
+    {"categoria": "Taxa de Gestão", "fonte": "taxa", "campo": "valor_taxa_gestao"},
+    {"categoria": "Taxa de Auditoria", "fonte": "taxa", "campo": "valor_taxa_auditoria"},
+    {"categoria": "Taxa Fisc. CVM", "fonte": "taxa", "campo": "valor_taxa_cvm"},
+    {"categoria": "Taxa ANBIMA", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Outras despesas  (-)", "fonte": "contas", "filtro": "Cetip"},
+    {"categoria": "Dif. de despesa CVM ", "fonte": "contas", "filtro": "Cvm"},
+    {"categoria": "Dif. de despesa ANBIMA", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "Outros valores a receber  (+)", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "PL Cotas Seniores", "fonte": "fixo", "valor_fixo": 0}
+  ],
+  "mapeamento_mec": [
+    {"categoria": "DATA", "fonte": "atributo", "campo": "data"},
+    {"categoria": "VALOR DE APLICAÇÃO", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "COTAS EMITIDAS", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "VALOR DE RESGATE ", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "COTAS RESGATADAS", "fonte": "fixo", "valor_fixo": 0},
+    {"categoria": "QUANT COTAS", "fonte": "valor_carteira", "chave_etl": "Qtde. Cota", "coluna": 1},
+    {"categoria": "VALOR DA COTA INFRA PREVIDÊNCIA", "fonte": "valor_carteira", "chave_etl": "Valor da Cota Líquida", "coluna": 1},
+    {"categoria": "AMORTIZ. DIA", "fonte": "fixo", "valor_fixo": 0}
+  ]
+}
