@@ -86,9 +86,9 @@ A diferença está em: **engine, nomes de aba, nomes de coluna, textos dos marca
 
 #### Sprint 1.1 — Infraestrutura (Semana 1)
 
-- [ ] Criar diretório `mapeamentos/` na raiz do projeto
-- [ ] Criar schema Pydantic `ItemMapeamento` em `src/config/schemas.py`
-- [ ] Implementar `src/services/mapping_engine.py` com resolvers:
+- [x] Criar diretório `mapeamentos/` na raiz do projeto
+- [x] Criar schema Pydantic `ItemMapeamento` em `src/config/schemas.py`
+- [x] Implementar `src/services/mapping_engine.py` com resolvers:
   - `atributo` → lê `carteira.data`, `carteira.patrimonio_total`, etc.
   - `valor_carteira` → chama `carteira.recuperar_valor_carteira(chave, coluna)`
   - `cotas` → chama `obter_valor_ordem(df_cotas, ordem, coluna)`
@@ -96,17 +96,17 @@ A diferença está em: **engine, nomes de aba, nomes de coluna, textos dos marca
   - `contas` → chama `carteira.recuperar_contas(filtro, df)`
   - `fixo` → valor constante (ex: `0`, `0.5`)
   - `custom` → chama função Python registrada (para Avanti, SB II)
-- [ ] Criar `ConfigDrivenBuilder` genérico que usa o engine
-- [ ] Testes unitários para `MappingEngine` com mocks
+- [x] Criar `ConfigDrivenBuilder` genérico que usa o engine
+- [x] Testes unitários para `MappingEngine` com mocks
 
 #### Sprint 1.2 — Migração Piloto (Semana 2)
 
-- [ ] Exportar mapeamento do `ZuluReportBuilder` para `mapeamentos/ZULU.json`
-- [ ] Exportar mapeamento do `CreditosColateralizadosReportBuilder` para JSON
-- [ ] Validar: resultado config-driven == resultado hardcoded (teste de regressão)
-- [ ] Se OK: remover builders legados migrados
-- [ ] Exportar `FidaraReportBuilder` → JSON
-- [ ] Exportar `CdcReportBuilder` → JSON (inclui lógica de cotas sênior)
+- [x] Exportar mapeamento do `ZuluReportBuilder` para `mapeamentos/ZULU.json`
+- [x] Exportar mapeamento do `CreditosColateralizadosReportBuilder` para JSON
+- [x] Validar: resultado config-driven == resultado hardcoded (teste de regressão)
+- [x] Se OK: remover builders legados migrados
+- [x] Exportar `FidaraReportBuilder` → JSON
+- [x] Exportar `CdcReportBuilder` → JSON (inclui lógica de cotas sênior)
 
 #### Sprint 1.3 — Migração Completa (Semana 3)
 

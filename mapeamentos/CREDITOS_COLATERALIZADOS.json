@@ -1,0 +1,231 @@
+{
+  "versao": "1.0",
+  "fundo": "CREDITOS_COLATERALIZADOS",
+  "administradora": "BRL",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "PDD - Prov. de Perdas",
+      "fonte": "atributo",
+      "campo": "pdd"
+    },
+    {
+      "categoria": "BRL FIRF DI LP",
+      "fonte": "atributo",
+      "campo": "valor_di"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "taxa",
+      "campo": "valor_taxa_gestao"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "taxa",
+      "campo": "valor_taxa_auditoria"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "contas",
+      "filtro": "Anbima",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "contas",
+      "filtro": "Contas a pagar",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "atributo",
+      "campo": "saldo_tesouraria"
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "taxa",
+      "campo": "valor_administracao"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "Taxa de Performance",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "taxa",
+      "campo": "valor_taxa_cvm"
+    },
+    {
+      "categoria": "Dif. Despesa Anbima",
+      "fonte": "contas",
+      "filtro": "Anbima",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Dif. Despesa CVM",
+      "fonte": "contas",
+      "filtro": "Cvm",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "contas",
+      "filtro": "Contas a receber",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "PL Carteira Subordinada Digitar",
+      "fonte": "atributo",
+      "campo": "patrimonio_total"
+    },
+    {
+      "categoria": "Títulos Públicos",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE RESGATE  SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "QUANT COTAS SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Qtde. Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "VALOR DA COTA SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Valor da Cota Líquida",
+      "coluna": 1
+    },
+    {
+      "categoria": "AMORTIZ. DIA SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "COTAS EMITIDAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE RESGATE MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "COTAS RESGATADAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "QUANT COTAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DA COTA - MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "AMORTIZ. DIA MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "COTAS RESGATADAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "QUANT COTAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "VALOR DA COTA - SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0
+    }
+  ]
+}

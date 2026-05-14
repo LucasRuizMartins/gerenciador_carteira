@@ -27,7 +27,7 @@ logger = get_logger(__name__)
 
 import os
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 from Carteira import CarteiraBase, CarteiraBRL, CarteiraAVANTI
 from src.config.settings import (
@@ -37,6 +37,7 @@ from src.config.settings import (
     resolver_path_relatorio,
 )
 from src.services.excel_writer import ExcelWriter
+from src.services.config_driven_builder import ConfigDrivenBuilder
 from src.services.report_builder import (
     AvantiReportBuilder,
     CarmelIIReportBuilder,
@@ -52,7 +53,6 @@ from src.services.report_builder import (
     ResidenceReportBuilder,
     SbIIReportBuilder,
     VirtusReportBuilder,
-    ZuluReportBuilder,
 )
 
 
@@ -80,7 +80,11 @@ class ConfiguracaoFundo:
     chave_carteira: str
     chave_gerencial: str
     classe_carteira: type[CarteiraBase]
-    builder: type[ReportBuilderBase]
+    # builder aceita:
+    #   - Classe legada (ex: ZuluReportBuilder) → instanciada com builder()
+    #   - Callable factory (ex: lambda: ConfigDrivenBuilder.de_arquivo("ZULU.json"))
+    #     → chamada com builder() para obter a instância já configurada
+    builder: type[ReportBuilderBase] | Callable[[], Any]
     chave_config_fundo: str | None = None
     abrir_apos_salvar: bool = True
 
@@ -169,12 +173,13 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         builder=SbIIReportBuilder,
         chave_config_fundo="SB II",
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "ZULU": ConfiguracaoFundo(
         nome="ZULU FIP",
         chave_carteira="ZULU",
         chave_gerencial="ZULU",
         classe_carteira=CarteiraBRL,
-        builder=ZuluReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("ZULU.json"),
     ),
     "VIRTUS": ConfiguracaoFundo(
         nome="VIRTUS CAPITAL",
@@ -183,12 +188,13 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         classe_carteira=CarteiraBRL,
         builder=VirtusReportBuilder,
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "CREDITOS_COLATERALIZADOS": ConfiguracaoFundo(
         nome="CRÉDITOS COLATERALIZADOS I",
         chave_carteira="CREDITOS_COLATERALIZADOS",
         chave_gerencial="CREDITOS_COLATERALIZADOS",
         classe_carteira=CarteiraBRL,
-        builder=CreditosColateralizadosReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("CREDITOS_COLATERALIZADOS.json"),
     ),
     "AVANTI": ConfiguracaoFundo(
         nome="AVANTI FIDC",
