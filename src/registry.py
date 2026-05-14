@@ -174,13 +174,14 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         classe_carteira=CarteiraBRL,
         builder=lambda: ConfigDrivenBuilder.de_arquivo("RESIDENCE.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "SB_II": ConfiguracaoFundo(
         nome="SB MULTIESTRATEGIA II",
-        chave_carteira="SB II",
-        chave_gerencial="SB II",
+        chave_carteira="SB_II",
+        chave_gerencial="SB_II",
         classe_carteira=CarteiraBRL,
-        builder=SbIIReportBuilder,
-        chave_config_fundo="SB II",
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("SB_II.json"),
+        chave_config_fundo="SB_II",
     ),
     # ✅ Fase 1 — Migrado para config-driven
     "ZULU": ConfiguracaoFundo(
@@ -206,12 +207,13 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         classe_carteira=CarteiraBRL,
         builder=lambda: ConfigDrivenBuilder.de_arquivo("CREDITOS_COLATERALIZADOS.json"),
     ),
+    # ✅ Fase 1 — Migrado para config-driven
     "AVANTI": ConfiguracaoFundo(
         nome="AVANTI FIDC",
         chave_carteira="AVANTI",
         chave_gerencial="AVANTI",
         classe_carteira=CarteiraAVANTI,
-        builder=AvantiReportBuilder,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("AVANTI.json"),
     ),
 }
 

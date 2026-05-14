@@ -20,7 +20,7 @@ from src.services.report_builder import (
     FidaraReportBuilder, CdcReportBuilder, CarmelIIReportBuilder,
     GerarReportBuilder, EnelReportBuilder, HousiReportBuilder,
     InfraReportBuilder, MoovpayReportBuilder, ResidenceReportBuilder,
-    VirtusReportBuilder
+    VirtusReportBuilder, SbIIReportBuilder, AvantiReportBuilder
 )
 from src.services.config_driven_builder import ConfigDrivenBuilder
 
@@ -80,6 +80,12 @@ def comparar(legado, novo, nome):
     for idx, (l, n) in enumerate(zip(legado, novo)):
         assert l["Categoria"] == n["Categoria"], f"{nome}[{idx}] categoria"
         val_l, val_n = l["Valor"], n["Valor"]
+        # Normalização de tipos para comparação (ex: Timestamp vs date)
+        if all(hasattr(val_l, attr) for attr in ["year", "month", "day"]):
+            val_l = date(val_l.year, val_l.month, val_l.day)
+        if all(hasattr(val_n, attr) for attr in ["year", "month", "day"]):
+            val_n = date(val_n.year, val_n.month, val_n.day)
+
         if isinstance(val_l, (int, float)):
             assert abs(float(val_l) - float(val_n)) < 1e-6, f"{nome}[{idx}] valor {l['Categoria']}: {val_l} != {val_n}"
         else:
@@ -96,6 +102,8 @@ def comparar(legado, novo, nome):
     (MoovpayReportBuilder, "MOOVPAY.json"),
     (ResidenceReportBuilder, "RESIDENCE.json"),
     (VirtusReportBuilder, "VIRTUS.json"),
+    (SbIIReportBuilder, "SB_II.json"),
+    (AvantiReportBuilder, "AVANTI.json"),
 ])
 def test_regressao_sprint13(carteira, builder_class, json_file):
     builder_legado = builder_class()

@@ -152,6 +152,31 @@ class ConfigDrivenBuilder:
             gestao = self._engine._resolver_contas(c, FakeItem(filtro='Gestão', dataframe='df_contas_receber_filtrado'))
             return contas + gestao
 
+        # --- Lógica SB_II ---
+        def resolver_titulos_sb_ii(c, _):
+            titulos_privados = ["DCRED_BRAVYAF", "DCRED_LYSKA", "DCRED_YOU INC"]
+            notas_comerciais = [
+                "AOI YAMA - 469301683", "BANCO ABC BRASIL 1", "BANCO ABC BRASIL S/A",
+                "BANCO SANTANDER SBII", "C165503 CANAA", "C254859 LYSKA", "C259712 LYSKA",
+                "C268475 MANCHE", "C310516 NELCARE", "C93998 ANPLA", "CAMPLEZI- 3016793840",
+                "NATZAR - 3173879168", "OYA ADVOGADOS", "SABZ ADVOGADOS", "TORTORO E RAGAZZI 1",
+                "TORTORO E RAGAZZI AD", "VICE S - 480391069", "VITORIA FIDELIS"
+            ]
+            df = c.dataframe
+            total = 0.0
+            try:
+                # Títulos Privados (Coluna 10)
+                total += df[df["Carteira"].isin(titulos_privados)]["Unnamed: 10"].sum()
+                # Notas Comerciais (Coluna 6)
+                total += df[df["Carteira"].isin(notas_comerciais)]["Unnamed: 6"].sum()
+            except: pass
+            return total
+
+        def resolver_outros_valores_sb_ii(c, _):
+            cvm = self._engine._resolver_contas(c, FakeItem(filtro='Cvm', dataframe='df_contas_receber_filtrado'))
+            contas = self._engine._resolver_contas(c, FakeItem(filtro='Contas a receber', dataframe='df_contas_receber_filtrado'))
+            return cvm + contas
+
         # Registro em lote no motor
         reg = self.registrar_custom
         reg("resolver_pdd_cdc", resolver_pdd_cdc)
@@ -168,9 +193,102 @@ class ConfigDrivenBuilder:
         reg("resolver_banco_liq_moovpay", resolver_banco_liq_moovpay)
         reg("resolver_outros_receber_moovpay", resolver_outros_receber_moovpay)
         reg("resolver_outras_despesas_moovpay", resolver_outras_despesas_moovpay)
+        reg("resolver_outros_valores_residence", resolver_outros_valores_residence)
+        reg("resolver_titulos_sb_ii", resolver_titulos_sb_ii)
+        reg("resolver_outros_valores_sb_ii", resolver_outros_valores_sb_ii)
+
+        # --- Lógica AVANTI ---
+        def somar_intervalo_avanti(df, inicio, fim, coluna, codigo):
+            def to_float_strict(v):
+                if hasattr(v, "iloc"): v = v.iloc[0]
+                if v is None or (isinstance(v, float) and pd.isna(v)): return 0.0
+                try:
+                    val = float(v)
+                    return 0.0 if pd.isna(val) else val
+                except: return 0.0
+
+            total = 0.0
+            try:
+                # Localiza a linha pelo código na coluna especificada
+                linha_dados = df[df[coluna] == codigo].iloc[0]
+                # Soma os valores nas posições (colunas) do intervalo
+                for i in range(inicio, fim):
+                    total += to_float_strict(linha_dados.iloc[i])
+            except: pass
+            return total
+
+        def resolver_avanti_itambe_estoque(c, _):
+            try:
+                df_est = pd.read_excel(c.path_carteira, sheet_name="ESTOQUE_ATUAL")
+                return df_est[df_est["SEU_NUMERO"] == "U0003360000001"]["VALOR_PRESENTE"].iloc[0]
+            except: return 0
+
+        def resolver_avanti_versa_1(c, _):
+            try:
+                df_est = pd.read_excel(c.path_carteira, sheet_name="ESTOQUE_ATUAL")
+                return df_est[df_est["SEU_NUMERO"] == 551995]["VALOR_PRESENTE"].iloc[0]
+            except: return 0
+
+        def resolver_avanti_versa_2(c, _):
+            try:
+                df_est = pd.read_excel(c.path_carteira, sheet_name="ESTOQUE_ATUAL")
+                return df_est[df_est["SEU_NUMERO"] == 774293]["VALOR_PRESENTE"].iloc[0]
+            except: return 0
+
+        def resolver_avanti_versa_3(c, _):
+            try:
+                df_est = pd.read_excel(c.path_carteira, sheet_name="ESTOQUE_ATUAL")
+                return df_est[df_est["SEU_NUMERO"] == 774294]["VALOR_PRESENTE"].iloc[0]
+            except: return 0
+
+        def resolver_avanti_ctr_itambe(c, _): return somar_intervalo_avanti(c.dataframe, 95, 105, "Unnamed: 1", 29690)
+        def resolver_avanti_carmel(c, _): return somar_intervalo_avanti(c.dataframe, 90, 105, "Unnamed: 1", "FIDC CARMEL II")
+        def resolver_avanti_saldo_tesouraria(c, _): return somar_intervalo_avanti(c.dataframe, 70, 90, "Unnamed: 2", "Total Saldos em Conta Corrente:")
+        def resolver_avanti_firf_id(c, _): return somar_intervalo_avanti(c.dataframe, 95, 105, "Unnamed: 1", "FIRF ID SOBERANO")
+        def resolver_avanti_id_rf(c, _): return somar_intervalo_avanti(c.dataframe, 80, 95, "Unnamed: 1", "ID RF LP FIC FI")
+        def resolver_avanti_santander(c, _): return somar_intervalo_avanti(c.dataframe, 80, 95, "Unnamed: 1", "SAN RF REF DI TITULOS PUB PREMIUM FC FI ")
+        def resolver_avanti_patrimonio(c, _): return somar_intervalo_avanti(c.dataframe, 70, 80, "Unnamed: 1", "PATRIMÔNIO FECHAMENTO")
+        def resolver_avanti_qtd_cota(c, _): return somar_intervalo_avanti(c.dataframe, 2, 15, "Unnamed: 3", "Qtd. Cotas")
+        def resolver_avanti_valor_cota(c, _): return somar_intervalo_avanti(c.dataframe, 45, 63, "Unnamed: 3", "Qtd. Cotas")
+
+        def resolver_avanti_taxa_adm(c, _):
+            a_receber_adm = self._engine._resolver_contas(c, FakeItem(filtro="Pagamento de Taxa Administração", dataframe="df_contas_receber")) + \
+                            self._engine._resolver_contas(c, FakeItem(filtro="Pagamento taxa de administração", dataframe="df_contas_receber"))
+            return c.valor_administracao + a_receber_adm
+
+        def resolver_avanti_taxa_gestao(c, _):
+            a_receber_gestao = (self._engine._resolver_contas(c, FakeItem(filtro="Pagamento taxa gestão", dataframe="df_contas_receber")) * -1) + \
+                               self._engine._resolver_contas(c, FakeItem(filtro="Pagamento taxa gestão", dataframe="df_contas_pagar"))
+            return c.valor_taxa_gestao + a_receber_gestao
+
+        def resolver_avanti_outros_receber(c, _):
+            a_receber = 0
+            try: a_receber = float(c.dataframe[c.dataframe["Unnamed: 1"] == "PAGAMENTO TAXA ADMINISTRAÇÃO - PAGO A MAIOR "].iloc[0, 81])
+            except: pass
+            a_receber += self._engine._resolver_contas(c, FakeItem(filtro="Pagamento ir - amortização", dataframe="df_contas_receber"))
+            return a_receber
+
+        # Registro Avanti
+        reg("resolver_avanti_itambe_estoque", resolver_avanti_itambe_estoque)
+        reg("resolver_avanti_versa_1", resolver_avanti_versa_1)
+        reg("resolver_avanti_versa_2", resolver_avanti_versa_2)
+        reg("resolver_avanti_versa_3", resolver_avanti_versa_3)
+        reg("resolver_avanti_ctr_itambe", resolver_avanti_ctr_itambe)
+        reg("resolver_avanti_carmel", resolver_avanti_carmel)
+        reg("resolver_avanti_saldo_tesouraria", resolver_avanti_saldo_tesouraria)
+        reg("resolver_avanti_firf_id", resolver_avanti_firf_id)
+        reg("resolver_avanti_id_rf", resolver_avanti_id_rf)
+        reg("resolver_avanti_santander", resolver_avanti_santander)
+        reg("resolver_avanti_patrimonio", resolver_avanti_patrimonio)
+        reg("resolver_avanti_qtd_cota", resolver_avanti_qtd_cota)
+        reg("resolver_avanti_valor_cota", resolver_avanti_valor_cota)
+        reg("resolver_avanti_taxa_adm", resolver_avanti_taxa_adm)
+        reg("resolver_avanti_taxa_gestao", resolver_avanti_taxa_gestao)
+        reg("resolver_avanti_outros_receber", resolver_avanti_outros_receber)
+        
+        # Restaurando Residence (acidentalmente removidos)
         reg("resolver_ilha_do_sol_residence", resolver_ilha_do_sol_residence)
         reg("resolver_outras_despesas_residence", resolver_outras_despesas_residence)
-        reg("resolver_outros_valores_residence", resolver_outros_valores_residence)
 
     # ------------------------------------------------------------------
     # Construtores alternativos

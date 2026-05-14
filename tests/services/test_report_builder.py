@@ -1,6 +1,6 @@
+from __future__ import annotations
 from _pytest import cacheprovider
 # pyrefly: ignore [invalid-syntax]
-from __future__ import annotations
 
 import sys
 import os

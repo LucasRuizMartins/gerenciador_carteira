@@ -31,8 +31,8 @@
     "PORTO": "PORTO FINO FIM CP.xlsm",
     "PORTUM": "PORTUM FIC DE FIM.xlsb",
     "RESIDENCE": "RESIDENCE CLUB.xlsb",
-    "SB II": "SB MULTIESTRATEGIA II.xlsb",
-    "SB MULTESTRATEGIA": "SB CREDITO FIDC.xlsb",
+    "SB_II": "SB MULTIESTRATEGIA II.xlsb",
+    "SB_MULTESTRATEGIA": "SB CREDITO FIDC.xlsb",
     "VIRTUS": "VIRTUS CAPITAL.xlsb",
     "ZULU": "ZULU FIP.xlsb",
     "CREDITOS_COLATERALIZADOS": "CREDITOS COLATERALIZADOS I FIDC.xlsb"
@@ -61,9 +61,10 @@
     "INFRA": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/INFRA PORTFOLIO I/CD_INFRA_FIDD.xlsx",
     "MOOVPAY": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/MOOVPAY/202410_MOOVPAY_CD.XLS.xlsx",
     "RESIDENCE": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/RESIDENCE CLUB FIDC/CD_RESIDENCE_APEX.xlsx",
-    "SB II": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/SB MULTIESTRATEGIA II/00 - SB MULTI II - CD.xlsx",
+    "SB_II": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/SB MULTIESTRATEGIA II/00 - SB MULTI II - CD.xlsx",
     "ZULU": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/ZULU FIP/2025_ZULU FIP_CD.xlsx",
-    "VIRTUS": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/VIRTUS CAPITAL/2025_VIRTUS CAPITAL_CD.xlsx"
+    "VIRTUS": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/VIRTUS CAPITAL/2025_VIRTUS CAPITAL_CD.xlsx",
+    "AVANTI": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/AVANTI FIDC/AVANTI_CD.xlsx"
   },
   "configuracoes_fundos": {
     "FIDARA": { "contas_pagar": ["Administração","ANBIMA","Auditoria","Custódia","CVM","Gestão","SELIC","CETIP","Banco Liquidante"] },
@@ -76,7 +77,7 @@
     "INFRA": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante"] },
     "MOOVPAY": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante","PERFORMANCE"] },
     "RESIDENCE": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante","Consultoria"] },
-    "SB II": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","consultoria","CETIP","Consultoria","Performance"] },
+    "SB_II": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","consultoria","CETIP","Consultoria","Performance"] },
     "ZULU": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","Custódia","consultoria","CETIP","ANBIMA"] },
     "VIRTUS": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","Consultoria"] }
   },
