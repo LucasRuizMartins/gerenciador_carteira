@@ -135,11 +135,11 @@ class ItemMapeamento(BaseModel):
         ),
     )
     agregacao: AgregacaoTipo = Field(
-        default="primeiro",
+        default="soma",
         description=(
             "'soma' para somar múltiplas ordens; "
             "'primeiro' para retornar apenas a primeira. "
-            "Padrão: 'primeiro'."
+            "Padrão: 'soma'."
         ),
     )
 
@@ -255,20 +255,6 @@ class MapeamentoFundo(BaseModel):
         description="Lista de itens para a aba MEC (Movimentação e Cota)."
     )
 
-    @model_validator(mode="after")
-    def validar_categorias_unicas(self) -> "MapeamentoFundo":
-        """Alerta sobre categorias duplicadas dentro de cada aba."""
-        for aba, itens in [("CD", self.mapeamento_cd), ("MEC", self.mapeamento_mec)]:
-            categorias = [item.categoria for item in itens]
-            vistos: set[str] = set()
-            duplicados = []
-            for c in categorias:
-                if c in vistos:
-                    duplicados.append(c)
-                vistos.add(c)
-            if duplicados:
-                raise ValueError(
-                    f"Aba {aba} do fundo '{self.fundo}' possui categorias duplicadas: "
-                    f"{duplicados}"
-                )
-        return self
+
+    # Removida validação de categorias únicas para permitir somas (acumulação de múltiplas fontes)
+    # conforme implementado no MappingEngine.

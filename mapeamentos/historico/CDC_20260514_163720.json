@@ -120,7 +120,7 @@
       "campo": "patrimonio_total"
     },
     {
-      "categoria": "Outras despesas operacionais (-)",
+      "categoria": "CETIP",
       "fonte": "contas",
       "filtro": "Cetip",
       "dataframe": "df_contas_filtrado"

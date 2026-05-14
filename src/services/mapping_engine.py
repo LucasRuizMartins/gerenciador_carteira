@@ -78,29 +78,39 @@ class MappingEngine:
 
     def resolver(self, carteira: Any, itens: list) -> MapeamentoExcel:
         """Resolve uma lista de ItemMapeamento contra a carteira.
-
-        Args:
-            carteira: Objeto carteira já carregado (CarteiraBase ou subclasse).
-            itens: Lista de ItemMapeamento (validados pelo schema Pydantic).
-
-        Returns:
-            MapeamentoExcel: Lista de {"Categoria": str, "Valor": Any}.
+        
+        Se houver múltiplas regras para a mesma Categoria, os valores são SOMADOS.
         """
-        resultado: MapeamentoExcel = []
+        # Dicionário temporário para acumular somas por categoria
+        acumulador: dict[str, float] = {}
+        
         for item in itens:
             try:
                 valor = self._resolver_item(carteira, item)
-                # Aplica multiplicador (ex: -1 para cotas que são passivo)
+                # Aplica multiplicador
                 if isinstance(valor, (int, float)) and item.multiplicador != 1.0:
                     valor = valor * item.multiplicador
-                resultado.append({"Categoria": item.categoria, "Valor": valor})
+                
+                # Acumula o valor (garante que seja numérico para soma)
+                cat = item.categoria
+                try:
+                    num_valor = float(valor)
+                except (ValueError, TypeError):
+                    num_valor = 0.0 if valor is None else valor # Mantém original se não for número (ex: strings)
+
+                if isinstance(num_valor, (int, float)):
+                    acumulador[cat] = acumulador.get(cat, 0.0) + num_valor
+                else:
+                    # Se for string (ex: Data-Base), apenas atribui (último vence)
+                    acumulador[cat] = valor
+                    
             except Exception as exc:
-                logger.error(
-                    f"Erro ao resolver item '{item.categoria}' "
-                    f"(fonte={item.fonte}): {exc}"
-                )
-                resultado.append({"Categoria": item.categoria, "Valor": 0.0})
-        return resultado
+                logger.error(f"Erro ao resolver item '{item.categoria}': {exc}")
+                if item.categoria not in acumulador:
+                    acumulador[item.categoria] = 0.0
+
+        # Converte o dicionário de volta para a lista [{"Categoria": ..., "Valor": ...}]
+        return [{"Categoria": cat, "Valor": val} for cat, val in acumulador.items()]
 
     def register_custom_resolver(self, nome: str, funcao: CustomResolver) -> None:
         """Registra uma função Python para ser usada com fonte='custom'.
@@ -220,7 +230,10 @@ class MappingEngine:
             )
             return 0.0
 
-        if item.agregacao == "soma":
+        # Por padrão, soma se houver uma lista. Só retorna o primeiro se explicitamente pedido.
+        agregacao = getattr(item, "agregacao", "soma") or "soma"
+        
+        if agregacao == "soma":
             return sum(
                 obter_valor_ordem(df_cotas, ordem, item.coluna_valor)
                 for ordem in item.ordens

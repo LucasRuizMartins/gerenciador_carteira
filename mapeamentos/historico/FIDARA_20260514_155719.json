@@ -121,9 +121,8 @@
     },
     {
       "categoria": "Outros valores a receber  (+)",
-      "fonte": "contas",
-      "filtro": "RECEBÍVEIS",
-      "dataframe": "df_contas_receber_filtrado"
+      "fonte": "atributo",
+      "campo": "outros_valores_receber"
     },
     {
       "categoria": "Outras despesas  (-)",

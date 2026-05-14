@@ -91,12 +91,12 @@
       "fonte": "cotas",
       "coluna_valor": "Valor Total",
       "ordens": [
-        96,
-        97,
-        93,
         98,
-        94,
-        95
+        97,
+        96,
+        95,
+        93,
+        94
       ],
       "multiplicador": -1.0
     },

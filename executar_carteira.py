@@ -217,20 +217,28 @@ def iniciar_interface():
 
     root.mainloop()
 
+
 def main():
-    # Verifica se o nome do fundo foi passado via linha de comando (ex: python executar_carteira.py FIDARA CD_ATUAL)
+    # Modo headless: fundo passado por linha de comando
     if len(sys.argv) > 1:
         fundo_escolhido = sys.argv[1]
         aba = sys.argv[2] if len(sys.argv) > 2 else "CD_ATUAL"
         if fundo_escolhido.lower() != 'sair':
             try:
                 executar(fundo_escolhido, aba)
-            except:
+            except Exception:
                 pass
             input("\nProcessamento finalizado. Pressione Enter para fechar...")
-    else:
-        # Se nenhum argumento for passado, inicia a GUI
+        return
+
+    # Modo GUI: PySide6 primeiro, fallback Tkinter
+    try:
+        from src.gui import main as gui_main
+        gui_main()
+    except ImportError:
+        logger.warning("PySide6 não disponível — usando interface Tkinter legada.")
         iniciar_interface()
+
 
 if __name__ == "__main__":
     main()

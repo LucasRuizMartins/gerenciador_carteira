@@ -34,7 +34,7 @@ def obter_valor_ordem(df, ordem, coluna):
         ordem_str = str(ordem)
         mascara = df['Ordem'].astype(str).str.replace(r'\.0$', '', regex=True) == ordem_str
         resultado = df.loc[mascara, coluna].values
-        return float(resultado[0]) if len(resultado) > 0 else 0.0
+        return sum(limpar_valor(v) for v in resultado) if len(resultado) > 0 else 0.0
     except (KeyError, IndexError, ValueError):
         return 0.0
 

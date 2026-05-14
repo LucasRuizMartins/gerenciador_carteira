@@ -1,6 +1,6 @@
 {
   "versao": "1.0",
-  "fundo": "CDC",
+  "fundo": "VIRTUS",
   "administradora": "BRL",
   "mapeamento_cd": [
     {
@@ -20,8 +20,8 @@
     },
     {
       "categoria": "PDD - Prov. de Perdas",
-      "fonte": "custom",
-      "nome_funcao": "resolver_pdd_cdc"
+      "fonte": "atributo",
+      "campo": "pdd"
     },
     {
       "categoria": "Saldo em Tesouraria",
@@ -29,7 +29,7 @@
       "campo": "saldo_tesouraria"
     },
     {
-      "categoria": "BRL FI DI LP",
+      "categoria": "FI BRL2314 - FI RF BRL SOB REF DI LP",
       "fonte": "atributo",
       "campo": "valor_di"
     },
@@ -37,6 +37,11 @@
       "categoria": "Taxa de Administração",
       "fonte": "taxa",
       "campo": "valor_administracao"
+    },
+    {
+      "categoria": "Taxa Consultoria",
+      "fonte": "contas",
+      "filtro": "Consultoria"
     },
     {
       "categoria": "Taxa de Custódia",
@@ -49,15 +54,19 @@
       "campo": "valor_taxa_gestao"
     },
     {
-      "categoria": "Despesa de Auditoria",
+      "categoria": "Taxa de Auditoria",
       "fonte": "taxa",
       "campo": "valor_taxa_auditoria"
     },
     {
-      "categoria": "Taxa Anbima (-)",
+      "categoria": "Taxa ANBIMA",
       "fonte": "contas",
-      "filtro": "Anbima",
-      "dataframe": "df_contas_filtrado"
+      "filtro": "Anbima"
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
     },
     {
       "categoria": "Taxa de Performance",
@@ -65,38 +74,36 @@
       "valor_fixo": 0.0
     },
     {
-      "categoria": "Outras despesas operacionais (-)",
-      "fonte": "contas",
-      "filtro": "Contas a pagar",
-      "dataframe": "df_contas_filtrado"
+      "categoria": "Outras despesas  (-)",
+      "fonte": "atributo",
+      "campo": "outros_valores_pagar"
     },
     {
-      "categoria": "Taxa Fisc. CVM",
+      "categoria": "Dif. de despesa CVM",
       "fonte": "taxa",
       "campo": "valor_taxa_cvm"
     },
     {
-      "categoria": "Diferimento de Taxa ANBIMA",
+      "categoria": "Dif. de despesa ANBIMA",
       "fonte": "contas",
-      "filtro": "Anbima",
-      "dataframe": "df_contas_receber_filtrado"
+      "filtro": "Anbima"
     },
     {
-      "categoria": "Outros valores  (+)",
-      "fonte": "custom",
-      "nome_funcao": "resolver_outros_valores_cdc"
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "atributo",
+      "campo": "outros_valores_receber"
+    },
+    {
+      "categoria": "Ajuste de Compensação de Cotas",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
     },
     {
       "categoria": "Senior (-)",
       "fonte": "cotas",
       "coluna_valor": "Valor Total",
       "ordens": [
-        96,
-        97,
-        93,
-        98,
-        94,
-        95
+        99
       ],
       "multiplicador": -1.0
     },
@@ -105,7 +112,7 @@
       "fonte": "cotas",
       "coluna_valor": "Valor Total",
       "ordens": [
-        99
+        98
       ],
       "multiplicador": -1.0
     },
@@ -115,15 +122,14 @@
       "valor_fixo": 0.0
     },
     {
-      "categoria": "PL Carteira Subordinada",
+      "categoria": "PL Carteira Subordinada Digitar",
       "fonte": "atributo",
       "campo": "patrimonio_total"
     },
     {
-      "categoria": "Outras despesas operacionais (-)",
-      "fonte": "contas",
-      "filtro": "Cetip",
-      "dataframe": "df_contas_filtrado"
+      "categoria": "Subordinação Mínima",
+      "fonte": "fixo",
+      "valor_fixo": 0.1
     }
   ],
   "mapeamento_mec": [
@@ -165,42 +171,6 @@
       "valor_fixo": 0.0
     },
     {
-      "categoria": "VALOR DE APLICAÇÃO MEZANINO",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "VALOR DE RESGATE MEZANINO",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "COTAS RESGATADAS MEZANINO",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "QUANT COTAS MEZANINO",
-      "fonte": "cotas",
-      "coluna_valor": "Qtde. Total",
-      "ordens": [
-        94
-      ]
-    },
-    {
-      "categoria": "VALOR DA COTA - MEZANINO",
-      "fonte": "cotas",
-      "coluna_valor": "Valor Cota",
-      "ordens": [
-        94
-      ]
-    },
-    {
-      "categoria": "AMORTIZ. DIA MEZANINO",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
       "categoria": "VALOR DE APLICAÇÃO SENIOR",
       "fonte": "fixo",
       "valor_fixo": 0.0
@@ -225,7 +195,7 @@
       "fonte": "cotas",
       "coluna_valor": "Qtde. Total",
       "ordens": [
-        98
+        99
       ]
     },
     {
@@ -233,7 +203,7 @@
       "fonte": "cotas",
       "coluna_valor": "Valor Cota",
       "ordens": [
-        98
+        99
       ]
     },
     {
@@ -242,101 +212,43 @@
       "valor_fixo": 0.0
     },
     {
-      "categoria": "QUANT COTAS SENIOR 3",
+      "categoria": "VALOR DE APLICAÇÃO MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS MEZANINO",
       "fonte": "cotas",
       "coluna_valor": "Qtde. Total",
       "ordens": [
-        97
+        98
       ]
     },
     {
-      "categoria": "VALOR DA COTA - SENIOR 3",
+      "categoria": "VALOR DA COTA - MEZANINO",
       "fonte": "cotas",
       "coluna_valor": "Valor Cota",
       "ordens": [
-        97
+        98
       ]
     },
     {
-      "categoria": "AMORTIZ. DIA SENIOR 3",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "QUANT COTAS SENIOR 4",
-      "fonte": "cotas",
-      "coluna_valor": "Qtde. Total",
-      "ordens": [
-        96
-      ]
-    },
-    {
-      "categoria": "VALOR DA COTA - SENIOR 4",
-      "fonte": "cotas",
-      "coluna_valor": "Valor Cota",
-      "ordens": [
-        96
-      ]
-    },
-    {
-      "categoria": "AMORTIZ. DIA SENIOR 4",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "QUANT COTAS SENIOR 5",
-      "fonte": "cotas",
-      "coluna_valor": "Qtde. Total",
-      "ordens": [
-        95
-      ]
-    },
-    {
-      "categoria": "VALOR DA COTA - SENIOR 5",
-      "fonte": "cotas",
-      "coluna_valor": "Valor Cota",
-      "ordens": [
-        95
-      ]
-    },
-    {
-      "categoria": "AMORTIZ. DIA SENIOR 5",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "QUANT COTAS SENIOR 6",
-      "fonte": "cotas",
-      "coluna_valor": "Qtde. Total",
-      "ordens": [
-        93
-      ]
-    },
-    {
-      "categoria": "VALOR DA COTA - SENIOR 6",
-      "fonte": "cotas",
-      "coluna_valor": "Valor Cota",
-      "ordens": [
-        93
-      ]
-    },
-    {
-      "categoria": "AMORTIZ. DIA SENIOR 6",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "QUANT COTAS SENIOR 7",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "VALOR DA COTA - SENIOR 7",
-      "fonte": "fixo",
-      "valor_fixo": 0.0
-    },
-    {
-      "categoria": "AMORTIZ. DIA SENIOR 7",
+      "categoria": "AMORTIZ. DIA MEZANINO",
       "fonte": "fixo",
       "valor_fixo": 0.0
     }

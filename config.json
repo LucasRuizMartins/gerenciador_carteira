@@ -53,7 +53,7 @@
   "carteiras": {
     "FIDARA": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/FIDARA FIDC/Carteira Diaria - Fidara FIDC - APEX.xlsb",
     "CDC": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/CDC EMPRESTIMO FIDC/2025_ Carteira Diária - CDC Emprestimo.xlsx",
-    "CARMEL_II": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/CARMEL II FIDC/2025_CARMEL RF_CD.xlsx",
+    "CARMEL_II": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/CARMEL II FIDC/00_CARMEL RF_CD.xlsx",
     "CREDITOS_COLATERALIZADOS": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/CREDITOS COLATERALIZADOS I FIDC/00 - CRÉDITOS COLATERALIZADOS_CD.xlsx",
     "GERAR": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/GERAR CAPITAL FIDC/GERAR_CD_DIARIO.xlsb",
     "ENEL": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/ENE II FIDC/01 - CARTEIRA DIÁRIA/Carteira Diaria -  Enel II Fidc.xlsx",
@@ -67,19 +67,165 @@
     "AVANTI": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/AVANTI FIDC/AVANTI_CD.xlsx"
   },
   "configuracoes_fundos": {
-    "FIDARA": { "contas_pagar": ["Administração","ANBIMA","Auditoria","Custódia","CVM","Gestão","SELIC","CETIP","Banco Liquidante"] },
-    "CDC": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","consultoria","CETIP"] },
-    "CARMEL_II": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","Custódia","consultoria","CETIP","ANBIMA"] },
-    "CREDITOS_COLATERALIZADOS": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","CETIP","ANBIMA"] },
-    "GERAR": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante","Consultoria"] },
-    "ENEL": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","CETIP","ANBIMA","Consultoria"] },
-    "HOUSI": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","TAXA DE CONSULTORIA"] },
-    "INFRA": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante"] },
-    "MOOVPAY": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante","PERFORMANCE"] },
-    "RESIDENCE": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","CUSTÓDIA","SELIC","Banco Liquidante","Consultoria"] },
-    "SB_II": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","consultoria","CETIP","Consultoria","Performance"] },
-    "ZULU": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","Custódia","consultoria","CETIP","ANBIMA"] },
-    "VIRTUS": { "contas_pagar": ["Administração","Auditoria","Gestão","CVM","ANBIMA","CETIP","Consultoria"] }
+    "FIDARA": {
+      "contas_pagar": [
+        "Administração",
+        "ANBIMA",
+        "Auditoria",
+        "Custódia",
+        "CVM",
+        "Gestão",
+        "SELIC",
+        "CETIP",
+        "Banco Liquidante"
+      ]
+    },
+    "CDC": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "consultoria",
+        "CETIP"
+      ]
+    },
+    "CARMEL_II": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "Custódia",
+        "consultoria",
+        "CETIP",
+        "ANBIMA"
+      ]
+    },
+    "CREDITOS_COLATERALIZADOS": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "CETIP",
+        "ANBIMA"
+      ]
+    },
+    "GERAR": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "CUSTÓDIA",
+        "SELIC",
+        "Banco Liquidante",
+        "Consultoria"
+      ]
+    },
+    "ENEL": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "CETIP",
+        "ANBIMA",
+        "Consultoria"
+      ]
+    },
+    "HOUSI": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "TAXA DE CONSULTORIA"
+      ]
+    },
+    "INFRA": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "CUSTÓDIA",
+        "SELIC",
+        "Banco Liquidante"
+      ]
+    },
+    "MOOVPAY": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "CUSTÓDIA",
+        "SELIC",
+        "Banco Liquidante",
+        "PERFORMANCE"
+      ]
+    },
+    "RESIDENCE": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "CUSTÓDIA",
+        "SELIC",
+        "Banco Liquidante",
+        "Consultoria"
+      ]
+    },
+    "SB_II": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "consultoria",
+        "CETIP",
+        "Consultoria",
+        "Performance"
+      ]
+    },
+    "ZULU": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "Custódia",
+        "consultoria",
+        "CETIP",
+        "ANBIMA"
+      ]
+    },
+    "VIRTUS": {
+      "contas_pagar": [
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "ANBIMA",
+        "CETIP",
+        "Consultoria"
+      ]
+    }
   },
   "destinatarios": [
     "lucas@carmelcapital.com.br",

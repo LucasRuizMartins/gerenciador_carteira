@@ -1,3 +1,6 @@
+PySide6
+pydantic
+python-dotenv
 pandas
 xlwings
 pyxlsb

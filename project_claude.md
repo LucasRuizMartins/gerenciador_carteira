@@ -110,14 +110,14 @@ A diferença está em: **engine, nomes de aba, nomes de coluna, textos dos marca
 
 #### Sprint 1.3 — Migração Completa (Semana 3)
 
-- [ ] Migrar todos os 15 builders restantes para JSON
-- [ ] Tratar casos especiais:
+- [x] Migrar todos os 15 builders restantes para JSON
+- [x] Tratar casos especiais:
   - `AvantiReportBuilder` → registrar funções custom no engine
   - `SbIIReportBuilder` → generalizar leitura de arquivo externo
   - `ResidenceReportBuilder` → loops de NC_ILHADOSOL
-- [ ] Remover `report_builder.py` legado (manter apenas `ConfigDrivenBuilder`)
-- [ ] Mover `obter_valor_ordem` de `carteira_apex.py` para `src/core/converters.py`
-- [ ] Atualizar `registry.py` para usar `ConfigDrivenBuilder`
+- [x] Remover `report_builder.py` legado (manter apenas `ConfigDrivenBuilder`)
+- [x] Mover `obter_valor_ordem` de `carteira_apex.py` para `src/core/converters.py`
+- [x] Atualizar `registry.py` para usar `ConfigDrivenBuilder`
 
 #### Entregável Fase 1
 - Todo mapeamento em arquivos JSON editáveis

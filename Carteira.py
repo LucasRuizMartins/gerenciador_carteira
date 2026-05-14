@@ -96,6 +96,7 @@ def _classificar_contas(
     coluna_descricao: str,
     coluna_valor: str,
     palavras_chave: list[str],
+    normalizar: bool = True,
 ) -> pd.DataFrame:
     """
     Normaliza a coluna de descrição substituindo substrings que batem com
@@ -106,17 +107,18 @@ def _classificar_contas(
     df = df.copy()
     df[coluna_valor] = pd.to_numeric(df[coluna_valor], errors="coerce").fillna(0.0)
 
-    descricoes = df[coluna_descricao].str.lower()
-    chaves_lower = [p.lower() for p in palavras_chave]
+    if normalizar:
+        descricoes = df[coluna_descricao].str.lower()
+        chaves_lower = [p.lower() for p in palavras_chave]
 
-    for chave in chaves_lower:
-        mask = descricoes.str.contains(chave, na=False)
-        df.loc[mask, coluna_descricao] = chave.capitalize()
+        for chave in chaves_lower:
+            mask = descricoes.str.contains(chave, na=False)
+            df.loc[mask, coluna_descricao] = chave.capitalize()
 
-    nao_substituido = ~df[coluna_descricao].str.lower().isin(chaves_lower)
-    df.loc[nao_substituido, coluna_descricao] = df.loc[nao_substituido, coluna_valor].apply(
-        lambda v: "Contas a receber" if v > 0 else "Contas a pagar"
-    )
+        nao_substituido = ~df[coluna_descricao].str.lower().isin(chaves_lower)
+        df.loc[nao_substituido, coluna_descricao] = df.loc[nao_substituido, coluna_valor].apply(
+            lambda v: "Contas a receber" if v > 0 else "Contas a pagar"
+        )
 
     return df.groupby(coluna_descricao, as_index=False)[coluna_valor].sum().sort_values(coluna_valor)
 
@@ -678,7 +680,9 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
             col_desc = self._detectar_coluna(df_cr, self._CANDIDATOS_DESCRICAO)
             col_val  = self._detectar_coluna(df_cr, self._CANDIDATOS_VALOR)
             if col_desc and col_val:
-                self.df_contas_receber_filtrado = _classificar_contas(df_cr, col_desc, col_val, self.codigos_contas_pagar)
+                self.df_contas_receber_filtrado = _classificar_contas(
+                    df_cr, col_desc, col_val, self.codigos_contas_pagar, normalizar=False
+                )
 
     def _limpar_df_contas(self, df: pd.DataFrame) -> pd.DataFrame:
         """Remove linhas de subtotal e total de um bloco de contas."""
@@ -734,14 +738,14 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
         try:
             filtro = df[coluna_descricao].str.contains(categoria, case=False, na=False)
             resultado = df.loc[filtro, coluna_valor]
-            return float(resultado.values[0]) if not resultado.empty else 0.0
+            return float(resultado.sum())
         except Exception:
             return 0.0
 
 
-# ---------------------------------------------------------------------------
+
 # CarteiraGenial
-# ---------------------------------------------------------------------------
+
 
 class CarteiraGenial(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
     """Administradora Genial – planilha 'CD_ATUAL' com coluna-chave 'Unnamed: 0'."""
