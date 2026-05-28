@@ -1,0 +1,197 @@
+{
+  "versao": "1.0",
+  "fundo": "INFRA_API",
+  "administradora": "API",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Belluno - Senior 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Infra Setorial FIP Multiestregia",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "INFRA SETORIAL FIP",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCaixa.total.totalValorTotal"
+    },
+    {
+      "categoria": "CONASA",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoDC.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "CONASA S.A.",
+      "campo_valor_json": "valorPresente"
+    },
+    {
+      "categoria": "LFT",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "LFT20290901 - 210100",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Itaú Soberano",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "RJI Cash FI RF",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Carmel FIC de FIDC",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "BRADESCO",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "CORPORATE RF SIMPLES",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "NTN-B",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PL Carteira  Digitar",
+      "fonte": "api_json",
+      "caminho_json": "carteira.plPosicao"
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE ADMINISTRAÇÃO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE CUSTÓDIA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE GESTÃO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA DE AUDITORIA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA CVM",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA DE TAXA CETIP",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Dif. de despesa CVM ",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA FISCALIZAÇÃO CVM - DIFERIDO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Dif. de despesa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PL Cotas Seniores",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE ",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS",
+      "fonte": "api_json",
+      "caminho_json": "carteira.qtdeCota"
+    },
+    {
+      "categoria": "VALOR DA COTA INFRA PREVIDÊNCIA",
+      "fonte": "api_json",
+      "caminho_json": "carteira.valorCotaBruta"
+    },
+    {
+      "categoria": "AMORTIZ. DIA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

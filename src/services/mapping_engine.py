@@ -81,12 +81,23 @@ class MappingEngine:
         
         Se houver múltiplas regras para a mesma Categoria, os valores são SOMADOS.
         """
+        # Inicializa lista de warnings na carteira caso não exista
+        if not hasattr(carteira, "warnings"):
+            carteira.warnings = []
+
         # Dicionário temporário para acumular somas por categoria
         acumulador: dict[str, float] = {}
         
         for item in itens:
             try:
                 valor = self._resolver_item(carteira, item)
+                
+                # Registra aviso se o campo for nulo/zero para fontes que deveriam conter dados
+                if (valor is None or valor == 0.0) and item.fonte in ["api_json", "contas", "valor_carteira", "atributo", "taxa"]:
+                    msg = f"Campo '{item.categoria}' não foi recuperado (retornou {valor}) usando a fonte '{item.fonte}'."
+                    if msg not in carteira.warnings:
+                        carteira.warnings.append(msg)
+
                 # Aplica multiplicador
                 if isinstance(valor, (int, float)) and item.multiplicador != 1.0:
                     valor = valor * item.multiplicador
@@ -106,6 +117,9 @@ class MappingEngine:
                     
             except Exception as exc:
                 logger.error(f"Erro ao resolver item '{item.categoria}': {exc}")
+                msg = f"Erro crítico ao resolver campo '{item.categoria}': {exc}"
+                if msg not in carteira.warnings:
+                    carteira.warnings.append(msg)
                 if item.categoria not in acumulador:
                     acumulador[item.categoria] = 0.0
 
@@ -142,6 +156,7 @@ class MappingEngine:
             "contas":         self._resolver_contas,
             "fixo":           self._resolver_fixo,
             "custom":         self._resolver_custom,
+            "api_json":       self._resolver_api_json,
         }
         resolver_fn = dispatch.get(item.fonte)
         if resolver_fn is None:
@@ -287,3 +302,66 @@ class MappingEngine:
                 f"Use engine.register_custom_resolver('{nome}', sua_funcao)."
             )
         return self._custom_resolvers[nome](carteira, item)
+
+    def _resolver_api_json(self, carteira: Any, item: Any) -> Any:
+        """Extrai um valor do JSON da API (carteira.raw_data) usando caminho de pontos e filtros.
+
+        Suporta notação de ponto para caminhos aninhados e busca com filtros em listas de objetos.
+        Agora também suporta atravessar listas intermediárias (ex: posicaoCotas...posicoes) de forma transparente.
+        """
+        raw_data = getattr(carteira, "raw_data", None)
+        if not raw_data:
+            logger.warning(f"Objeto carteira não possui raw_data para resolver {item.categoria}.")
+            return 0.0
+
+        # O ponto de partida é raw_data["data"] se existir, senão raw_data
+        val = raw_data.get("data", raw_data) if isinstance(raw_data, dict) else raw_data
+        
+        keys = item.caminho_json.split(".")
+        
+        for key in keys:
+            if key == "data" and val is raw_data.get("data"):
+                continue # ignora o primeiro "data." se já estamos dentro dele
+            
+            if isinstance(val, list):
+                # Achata (flatten) as chaves de todos os dicionários na lista
+                nova_val = []
+                for elem in val:
+                    if isinstance(elem, dict) and key in elem:
+                        item_val = elem[key]
+                        if isinstance(item_val, list):
+                            nova_val.extend(item_val)
+                        else:
+                            nova_val.append(item_val)
+                val = nova_val
+            elif isinstance(val, dict):
+                if key in val:
+                    val = val[key]
+                else:
+                    logger.info(f"Caminho JSON '{item.caminho_json}' (chave '{key}') não encontrado para {item.categoria}.")
+                    return 0.0
+            else:
+                return 0.0
+
+        # Se val for uma lista e filtros foram definidos
+        if isinstance(val, list) and item.chave_filtro_json and item.valor_filtro_json:
+            for elem in val:
+                if isinstance(elem, dict) and str(elem.get(item.chave_filtro_json)).upper() == str(item.valor_filtro_json).upper():
+                    if item.campo_valor_json:
+                        # Processa chaves aninhadas separadas por ponto
+                        v = elem
+                        for k in item.campo_valor_json.split("."):
+                            if isinstance(v, dict):
+                                v = v.get(k, 0.0)
+                            elif isinstance(v, list):
+                                # Se encontrar uma lista intermediária (ex: "valores.valorTotal")
+                                # soma os valores da chave dentro de todos os itens da lista
+                                v = sum(float(x.get(k, 0.0)) for x in v if isinstance(x, dict) and k in x)
+                            else:
+                                v = 0.0
+                                break
+                        return v
+                    return elem
+            return 0.0
+
+        return val

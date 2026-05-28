@@ -1,0 +1,280 @@
+{
+  "versao": "1.0",
+  "fundo": "VIRTUS",
+  "administradora": "BRL",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoDC.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "A VENCER",
+      "campo_valor_json": "valorPresente"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoDC.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "VENCIDO",
+      "campo_valor_json": "valorPresente"
+    },
+    {
+      "categoria": "PDD - Prov. de Perdas",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoPDD.total.totalValorTotal"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCaixa.total.totalValorTotal"
+    },
+    {
+      "categoria": "FI BRL2314 - FI RF BRL SOB REF DI LP",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "FI BRL1200 - FIF RF BRL REF DI LP",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "FI BRL2314 - FI RF BRL SOB REF DI LP",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "FIF BRL2314 - FIF RENDA FIXA BRL SOBERANO REFERENCIADO DI LONGO PRAZO",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE ADMINISTRAÇÃO",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Taxa Consultoria",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE CONSULTORIA",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE GESTÃO",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA DE AUDITORIA",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa de Performance",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Dif. de despesa CVM",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA CVM",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Dif. de despesa ANBIMA",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA - ANBIMA",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Dif. de despesa ANBIMA",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA ANBIMA",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "RECEBÍVEIS (CRÉDITO)",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Ajuste de Compensação de Cotas",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Títulos Públicos",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PL Carteira Subordinada Digitar",
+      "fonte": "api_json",
+      "caminho_json": "carteira.plPosicao"
+    },
+    {
+      "categoria": "Subordinação Mínima",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DA COTA SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "AMORTIZ. DIA SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DA COTA - SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DA COTA - MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "AMORTIZ. DIA MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

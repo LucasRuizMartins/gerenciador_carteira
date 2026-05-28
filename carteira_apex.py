@@ -38,5 +38,3 @@ def obter_valor_ordem(df, ordem, coluna):
     except (KeyError, IndexError, ValueError):
         return 0.0
 
-# --- Fim dos Helpers ---
-# Nota: Funções legadas de gerar_carteira_* foram removidas e migradas para o src.registry.

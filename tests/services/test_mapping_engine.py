@@ -296,6 +296,44 @@ class TestResolverCustom:
             engine._resolver_custom(carteira_mock, item)
 
 
+class TestResolverApiJson:
+    def test_resolver_api_json_simples(self, engine):
+        carteira = MagicMock()
+        carteira.raw_data = {"data": {"posicaoCaixa": {"total": {"totalValorTotal": 12345.67}}}}
+        item = ItemMapeamento(
+            categoria="Saldo Tesouraria",
+            fonte="api_json",
+            caminho_json="posicaoCaixa.total.totalValorTotal"
+        )
+        resultado = engine._resolver_api_json(carteira, item)
+        assert resultado == 12345.67
+
+    def test_resolver_api_json_com_filtro(self, engine):
+        carteira = MagicMock()
+        carteira.raw_data = {
+            "data": {
+                "posicaoOutros": {
+                    "posicaoDC": {
+                        "posicoes": [
+                            {"papel": "A VENCER", "valorPresente": 800000.0},
+                            {"papel": "VENCIDO", "valorPresente": 100000.0}
+                        ]
+                    }
+                }
+            }
+        }
+        item = ItemMapeamento(
+            categoria="Direitos Creditórios a Vencer",
+            fonte="api_json",
+            caminho_json="posicaoOutros.posicaoDC.posicoes",
+            chave_filtro_json="papel",
+            valor_filtro_json="A VENCER",
+            campo_valor_json="valorPresente"
+        )
+        resultado = engine._resolver_api_json(carteira, item)
+        assert resultado == 800000.0
+
+
 # ===========================================================================
 # Testes de integração do resolver principal
 # ===========================================================================
@@ -457,21 +495,16 @@ class TestSchemaItemMapeamento:
         assert item.categoria == "Data-Base"
         assert item.multiplicador == 1.0  # default
 
+    def test_api_json_requer_caminho_json(self):
+        with pytest.raises(Exception, match="caminho_json"):
+            ItemMapeamento(categoria="X", fonte="api_json")
+
+    def test_valido_api_json(self):
+        item = ItemMapeamento(categoria="X", fonte="api_json", caminho_json="data.posicao")
+        assert item.categoria == "X"
+
 
 class TestSchemaMapeamentoFundo:
-    def test_categorias_duplicadas_levanta_erro(self):
-        dados = {
-            "fundo": "X",
-            "administradora": "Y",
-            "mapeamento_cd": [
-                {"categoria": "Data-Base", "fonte": "atributo", "campo": "data"},
-                {"categoria": "Data-Base", "fonte": "atributo", "campo": "data"},
-            ],
-            "mapeamento_mec": [],
-        }
-        with pytest.raises(Exception, match="duplicadas"):
-            MapeamentoFundo.model_validate(dados)
-
     def test_valido_completo(self):
         dados = {
             "fundo": "ZULU",

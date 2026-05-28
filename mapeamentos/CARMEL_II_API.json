@@ -1,0 +1,225 @@
+{
+  "versao": "1.0",
+  "fundo": "CARMEL_II_API",
+  "administradora": "API",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Residence Club - Senior 3",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "FIDC BRL2954 - RESIDENCE CLUB FIDC : FIDC BRL2954 - RESIDENCE CLUB FIDC - SR 03",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Residence Club - Mezanino A",
+      "fonte": "custom",
+      "nome_funcao": "resolver_mez_a_carmel_ii"
+    },
+    {
+      "categoria": "Residence Club - Mezanino B2",
+      "fonte": "custom",
+      "nome_funcao": "resolver_mez_b_carmel_ii"
+    },
+    {
+      "categoria": "CDC - Sênior",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "FIDC BRL2830 - CDC EMPRESTIMOS FIDC DE CLASSE UNICA FECHADA : FIDC BRL2830 - CDC EMPRESTIMOS FIDC DE CLASSE ÚNICA FECHADA SEN",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "SB Crédito - Mezanino H",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "SB CREDITO FIDC MULTISETORIAL MEZ H",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "SB Crédito - Mezanino D",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Carmel FIC FIDC",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "CARMEL FIC FIDC",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer - NC Moovpay",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "Total NC-PRÉ:",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "CRI REIT",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "CRI_25B2384188",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "BRL FIRF DI LP",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "FI BRL1200 - FIF RF BRL REF DI LP",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "NTN-B",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCotas.posicoesPorTipoFundo.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "NTNB20600815 - 760199",
+      "campo_valor_json": "valorTotal"
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE ADMINISTRAÇÃO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA DE GESTÃO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA DE AUDITORIA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA CVM",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA ANBIMA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "api_json",
+      "caminho_json": "valoresPagar.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA - ANBIMA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "atributo",
+      "campo": "outros_valores_pagar"
+    },
+    {
+      "categoria": "Dif. de despesa CVM",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "TAXA FISCALIZAÇÃO CVM - DIFERIDO",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Dif. de despesa ANBIMA",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "DESPESA - ANBIMA",
+      "campo_valor_json": "total.totalValorTotal"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "api_json",
+      "caminho_json": "valoresReceber.valoresPorHistorico",
+      "chave_filtro_json": "nome",
+      "valor_filtro_json": "RECEBÍVEIS (CRÉDITO)",
+      "campo_valor_json": "valores.valorTotal"
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PL Carteira Subordinada",
+      "fonte": "api_json",
+      "caminho_json": "carteira.plPosicao"
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS",
+      "fonte": "api_json",
+      "caminho_json": "carteira.qtdeCota"
+    },
+    {
+      "categoria": "VALOR DA COTA CARMEL II FIDC",
+      "fonte": "api_json",
+      "caminho_json": "carteira.valorCotaBruta"
+    },
+    {
+      "categoria": "AMORTIZ. DIA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

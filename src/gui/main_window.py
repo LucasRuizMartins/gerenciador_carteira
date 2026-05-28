@@ -22,12 +22,18 @@ from PySide6.QtWidgets import (
 from src.gui.styles import COLORS
 from src.gui.pages.launcher_page import LauncherPage
 from src.gui.pages.mapping_editor_page import MappingEditorPage
+from src.gui.pages.api_launcher_page import ApiLauncherPage
+from src.gui.pages.api_mapping_page import ApiMappingPage
+from src.gui.pages.fundos_page import FundosPage
 
 
 # Definição das páginas da sidebar
 _PAGINAS = [
-    ("🚀", "Lançamentos",   LauncherPage),
-    ("🗂️", "Mapeamentos",  MappingEditorPage),
+    ("🚀", "Lançamentos",     LauncherPage),
+    ("🌐", "Ingestão API",    ApiLauncherPage),
+    ("🔗", "Mapeamento API",  ApiMappingPage),
+    ("🏦", "Fundos",          FundosPage),
+    ("🗂️", "Mapeamentos",    MappingEditorPage),
 ]
 
 

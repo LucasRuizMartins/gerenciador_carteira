@@ -1,0 +1,267 @@
+{
+  "versao": "1.0",
+  "fundo": "VIRTUS",
+  "administradora": "BRL",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoDC.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "A VENCER",
+      "campo_valor_json": "valorPresente"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoDC.posicoes",
+      "chave_filtro_json": "papel",
+      "valor_filtro_json": "VENCIDO",
+      "campo_valor_json": "valorPresente"
+    },
+    {
+      "categoria": "PDD - Prov. de Perdas",
+      "fonte": "api_json",
+      "caminho_json": "posicaoOutros.posicaoPDD.total.totalValorTotal"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "api_json",
+      "caminho_json": "posicaoCaixa.total.totalValorTotal"
+    },
+    {
+      "categoria": "FI BRL2314 - FI RF BRL SOB REF DI LP",
+      "fonte": "atributo",
+      "campo": "valor_di"
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "taxa",
+      "campo": "valor_administracao"
+    },
+    {
+      "categoria": "Taxa Consultoria",
+      "fonte": "contas",
+      "filtro": "Consultoria",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "taxa",
+      "campo": "valor_taxa_custodia"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "taxa",
+      "campo": "valor_taxa_gestao"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "taxa",
+      "campo": "valor_taxa_auditoria"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "contas",
+      "filtro": "Anbima",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "contas",
+      "filtro": "TAXA CVM",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Taxa de Performance",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "atributo",
+      "campo": "outros_valores_pagar"
+    },
+    {
+      "categoria": "Dif. de despesa CVM",
+      "fonte": "taxa",
+      "campo": "valor_taxa_cvm"
+    },
+    {
+      "categoria": "Dif. de despesa ANBIMA",
+      "fonte": "contas",
+      "filtro": "Anbima",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "contas",
+      "filtro": "RECEBÍVEIS",
+      "dataframe": "df_contas_receber_filtrado"
+    },
+    {
+      "categoria": "Ajuste de Compensação de Cotas",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "cotas",
+      "coluna_valor": "Valor Total",
+      "ordens": [
+        99
+      ],
+      "multiplicador": -1.0
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "cotas",
+      "coluna_valor": "Valor Total",
+      "ordens": [
+        98
+      ],
+      "multiplicador": -1.0
+    },
+    {
+      "categoria": "Títulos Públicos",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PL Carteira Subordinada Digitar",
+      "fonte": "atributo",
+      "campo": "valor_subordinada"
+    },
+    {
+      "categoria": "Subordinação Mínima",
+      "fonte": "fixo",
+      "valor_fixo": 0.1
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Qtde. Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "VALOR DA COTA SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Valor da Cota Líquida",
+      "coluna": 1
+    },
+    {
+      "categoria": "AMORTIZ. DIA SUBORDINADA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS SENIOR",
+      "fonte": "cotas",
+      "coluna_valor": "Qtde. Total",
+      "ordens": [
+        99
+      ]
+    },
+    {
+      "categoria": "VALOR DA COTA - SENIOR",
+      "fonte": "cotas",
+      "coluna_valor": "Valor Cota",
+      "ordens": [
+        99
+      ]
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS EMITIDAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS MEZANINO",
+      "fonte": "cotas",
+      "coluna_valor": "Qtde. Total",
+      "ordens": [
+        98
+      ]
+    },
+    {
+      "categoria": "VALOR DA COTA - MEZANINO",
+      "fonte": "cotas",
+      "coluna_valor": "Valor Cota",
+      "ordens": [
+        98
+      ]
+    },
+    {
+      "categoria": "AMORTIZ. DIA MEZANINO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

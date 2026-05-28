@@ -56,6 +56,7 @@ FonteTipo = Literal[
     "contas",         # Chama carteira.recuperar_contas(filtro, df)
     "fixo",           # Valor constante definido no JSON
     "custom",         # Delega para função Python registrada no engine
+    "api_json",       # Extrai valor do JSON da API usando caminho de pontos e filtros
 ]
 
 FonteDF = Literal[
@@ -175,6 +176,24 @@ class ItemMapeamento(BaseModel):
         ),
     )
 
+    # --- Campos para fonte="api_json" ---
+    caminho_json: str | None = Field(
+        default=None,
+        description="Caminho JSON para extrair o valor da API (ex: 'data.posicaoCaixa.total.totalValorTotal')",
+    )
+    chave_filtro_json: str | None = Field(
+        default=None,
+        description="Nome da chave usada para filtrar uma lista de objetos JSON (ex: 'papel')",
+    )
+    valor_filtro_json: Any | None = Field(
+        default=None,
+        description="Valor da chave usado para filtrar a lista (ex: 'A VENCER' ou 99)",
+    )
+    campo_valor_json: str | None = Field(
+        default=None,
+        description="Nome do campo que contém o valor final a ser extraído do elemento filtrado (ex: 'valorPresente')",
+    )
+
     # --- Modificadores universais ---
     multiplicador: float = Field(
         default=1.0,
@@ -218,6 +237,9 @@ class ItemMapeamento(BaseModel):
 
         if self.fonte == "custom" and not self.nome_funcao:
             erros.append("fonte='custom' requer 'nome_funcao'.")
+
+        if self.fonte == "api_json" and not self.caminho_json:
+            erros.append("fonte='api_json' requer 'caminho_json'.")
 
         if erros:
             raise ValueError(

@@ -8,3 +8,4 @@ xlrd
 openpyxl
 pytest
 pytest-cov
+requests

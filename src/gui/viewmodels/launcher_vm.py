@@ -17,13 +17,15 @@ class _WorkerSignals(QObject):
     sucesso   = Signal(str, float) # nome_fundo, tempo_segundos
     erro      = Signal(str, str)   # nome_fundo, mensagem_erro
     log_line  = Signal(str)        # linha de log em tempo real
+    avisos    = Signal(str, list)  # nome_fundo, lista_de_avisos
 
 
 class _FundoWorker(QRunnable):
-    def __init__(self, nome_fundo: str, aba: str, signals: _WorkerSignals):
+    def __init__(self, nome_fundo: str, aba: str, signals: _WorkerSignals, data_referencia: Any = None):
         super().__init__()
         self._nome = nome_fundo
         self._aba  = aba
+        self._data = data_referencia
         self.signals = signals
         self.setAutoDelete(True)
 
@@ -35,8 +37,10 @@ class _FundoWorker(QRunnable):
         self.signals.iniciando.emit(self._nome)
         start = time.time()
         try:
-            processar_fundo_registrado(self._nome, aba=self._aba)
+            warnings = processar_fundo_registrado(self._nome, aba=self._aba, data_referencia=self._data)
             elapsed = time.time() - start
+            if warnings:
+                self.signals.avisos.emit(self._nome, warnings)
             self.signals.sucesso.emit(self._nome, elapsed)
         except Exception as exc:
             self.signals.erro.emit(self._nome, str(exc))
@@ -50,11 +54,13 @@ class LauncherViewModel(QObject):
         iniciando(nome_fundo)
         sucesso(nome_fundo, segundos)
         erro(nome_fundo, mensagem)
+        avisos(nome_fundo, lista_avisos)
     """
 
     iniciando = Signal(str)
     sucesso   = Signal(str, float)
     erro      = Signal(str, str)
+    avisos    = Signal(str, list)
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -65,10 +71,11 @@ class LauncherViewModel(QObject):
         self._signals.iniciando.connect(self.iniciando)
         self._signals.sucesso.connect(self.sucesso)
         self._signals.erro.connect(self.erro)
+        self._signals.avisos.connect(self.avisos)
 
-    def executar(self, nome_fundo: str, aba: str = "CD_ATUAL") -> None:
+    def executar(self, nome_fundo: str, aba: str = "CD_ATUAL", data_referencia: Any = None) -> None:
         """Dispara processamento em thread separada."""
-        worker = _FundoWorker(nome_fundo, aba, self._signals)
+        worker = _FundoWorker(nome_fundo, aba, self._signals, data_referencia=data_referencia)
         self._pool.start(worker)
 
     def executar_batch(self, fundos_abas: dict[str, str]) -> None:
