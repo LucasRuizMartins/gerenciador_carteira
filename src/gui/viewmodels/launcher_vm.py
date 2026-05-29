@@ -3,6 +3,8 @@ ViewModel para execução de fundos.
 Roda processar_fundo_registrado() em QThread separada
 e emite sinais de progresso/resultado para a View.
 """
+from typing import Any
+# pyrefly: ignore [invalid-syntax]
 from __future__ import annotations
 
 import os
