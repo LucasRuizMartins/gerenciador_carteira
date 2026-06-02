@@ -100,8 +100,8 @@
     },
     {
       "categoria": "Taxa de Gestão",
-      "fonte": "custom",
-      "nome_funcao": "resolver_avanti_taxa_gestao"
+      "fonte": "taxa",
+      "campo": "valor_taxa_gestao"
     },
     {
       "categoria": "Taxa de Auditoria",
@@ -115,8 +115,8 @@
     },
     {
       "categoria": "Outras despesas  (-)",
-      "fonte": "taxa",
-      "campo": "outros_valores_pagar"
+      "fonte": "fixo",
+      "valor_fixo": 0.0
     },
     {
       "categoria": "Taxa ANBIMA",
@@ -155,8 +155,8 @@
     },
     {
       "categoria": "Outros valores a receber  (+)",
-      "fonte": "custom",
-      "nome_funcao": "resolver_avanti_outros_receber"
+      "fonte": "fixo",
+      "valor_fixo": 0.0
     },
     {
       "categoria": "PL Carteira Subordinada",

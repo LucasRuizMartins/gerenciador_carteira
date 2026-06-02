@@ -58,6 +58,7 @@ class AppSettings(BaseModel):
     laminas: dict[str, str]
     carteiras: dict[str, str]
     configuracoes_fundos: dict[str, FundoConfigItem]
+    administradoras: list[str] = Field(default_factory=lambda: ["APEX", "Singulare", "Genial", "Terra", "Avanti"])
     destinatarios: list[str]
 
     @field_validator("paths")

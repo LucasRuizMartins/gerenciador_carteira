@@ -24,6 +24,7 @@ from src.gui.pages.launcher_page import LauncherPage
 from src.gui.pages.mapping_editor_page import MappingEditorPage
 from src.gui.pages.api_launcher_page import ApiLauncherPage
 from src.gui.pages.api_mapping_page import ApiMappingPage
+from src.gui.pages.file_mapping_page import FileMappingPage
 from src.gui.pages.fundos_page import FundosPage
 
 
@@ -32,8 +33,9 @@ _PAGINAS = [
     ("🚀", "Lançamentos",     LauncherPage),
     ("🌐", "Ingestão API",    ApiLauncherPage),
     ("🔗", "Mapeamento API",  ApiMappingPage),
+    ("📂", "Mapeamento Arq",  FileMappingPage),
     ("🏦", "Fundos",          FundosPage),
-    ("🗂️", "Mapeamentos",    MappingEditorPage),
+   # ("🗂️", "Mapeamentos",    MappingEditorPage),
 ]
 
 

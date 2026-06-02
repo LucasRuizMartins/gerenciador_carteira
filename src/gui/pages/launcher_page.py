@@ -5,7 +5,7 @@ Mostra um grid de cards para cada fundo do REGISTRO.
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal, QSize
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QShowEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -87,6 +87,68 @@ class _AbaDialog(QDialog):
         return self.combo.currentText()
 
 
+class CollapsibleSection(QWidget):
+    """Seção colapsável/expansível para agrupar fundos por administradora."""
+
+    def __init__(self, titulo: str, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.titulo = titulo
+        self._aberto = False
+
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # Cabeçalho da seção
+        self.btn_header = QPushButton()
+        self.btn_header.setFixedHeight(46)
+        self.btn_header.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_header.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {COLORS['surface']};
+                border: 1px solid {COLORS['border']};
+                border-radius: 8px;
+                text-align: left;
+                padding-left: 18px;
+                color: {COLORS['text']};
+                font-weight: bold;
+                font-size: 13px;
+                font-family: "Segoe UI";
+            }}
+            QPushButton:hover {{
+                background-color: {COLORS['surface_alt']};
+                border-color: {COLORS['accent_hover']};
+            }}
+        """)
+        self.btn_header.clicked.connect(self.toggle)
+        layout.addWidget(self.btn_header)
+
+        # Área de conteúdo (onde fica a grid de fundos)
+        self.content_area = QWidget()
+        self.content_area.setVisible(False)
+        self.content_layout = QGridLayout(self.content_area)
+        self.content_layout.setContentsMargins(8, 12, 8, 12)
+        self.content_layout.setSpacing(12)
+        layout.addWidget(self.content_area)
+
+        self._atualizar_header()
+
+    def toggle(self) -> None:
+        self._aberto = not self._aberto
+        self.content_area.setVisible(self._aberto)
+        self._atualizar_header()
+
+    def _atualizar_header(self) -> None:
+        chevron = "▼" if self._aberto else "▶"
+        self.btn_header.setText(f"{chevron}   {self.titulo}")
+
+    def add_card(self, card: QWidget, row: int, col: int) -> None:
+        self.content_layout.addWidget(card, row, col)
+
+
 class LauncherPage(QWidget):
     """
     Página principal de execução de fundos.
@@ -119,6 +181,12 @@ class LauncherPage(QWidget):
         header.addStretch()
 
         # Barra de ações
+        self._btn_refresh = QPushButton("🔄 Atualizar")
+        self._btn_refresh.setToolTip("Recarrega a lista de fundos cadastrados")
+        self._btn_refresh.setObjectName("btn_secondary")
+        self._btn_refresh.clicked.connect(self._popular_grid)
+        header.addWidget(self._btn_refresh)
+
         self._btn_batch = QPushButton("⚡ Processar Todos")
         self._btn_batch.setToolTip("Processa todos os fundos com CD_ATUAL")
         self._btn_batch.clicked.connect(self._on_batch)
@@ -139,8 +207,10 @@ class LauncherPage(QWidget):
         scroll.setFrameShape(QFrame.Shape.NoFrame)
 
         container = QWidget()
-        self._grid = QGridLayout(container)
-        self._grid.setSpacing(12)
+        self._grid_layout = QVBoxLayout(container)
+        self._grid_layout.setContentsMargins(0, 0, 0, 0)
+        self._grid_layout.setSpacing(16)
+        self._grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         scroll.setWidget(container)
 
         self._popular_grid()
@@ -169,18 +239,40 @@ class LauncherPage(QWidget):
         root.addWidget(btn_limpar, alignment=Qt.AlignmentFlag.AlignRight)
 
     def _popular_grid(self) -> None:
-        fundos = self._vm.fundos_disponiveis()
-        cols = 3
-        for i, nome in enumerate(fundos):
-            card = _FundCard(nome)
-            card.clicked.connect(lambda checked=False, n=nome: self._on_card_click(n))
-            self._cards[nome] = card
-            self._grid.addWidget(card, i // cols, i % cols)
+        self._cards.clear()
+        
+        # Remove widgets anteriores da grid principal
+        while self._grid_layout.count():
+            item = self._grid_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+                
+        agrupados = self._vm.fundos_agrupados()
+        
+        # Cria as seções colapsáveis na grid principal
+        for adm, fundos in sorted(agrupados.items()):
+            if not fundos:
+                continue
+                
+            section = CollapsibleSection(adm, parent=self)
+            self._grid_layout.addWidget(section)
+            
+            # Popula a seção com os cards em grid
+            cols = 3
+            for i, nome in enumerate(fundos):
+                card = _FundCard(nome)
+                card.clicked.connect(lambda checked=False, n=nome: self._on_card_click(n))
+                self._cards[nome] = card
+                section.add_card(card, i // cols, i % cols)
 
     def _conectar_vm(self) -> None:
         self._vm.iniciando.connect(self._on_iniciando)
         self._vm.sucesso.connect(self._on_sucesso)
         self._vm.erro.connect(self._on_erro)
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        self._popular_grid()
 
     # ------------------------------------------------------------------
     # Slots

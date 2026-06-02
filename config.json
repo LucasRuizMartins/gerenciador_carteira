@@ -35,7 +35,8 @@
     "SB_MULTESTRATEGIA": "SB CREDITO FIDC.xlsb",
     "VIRTUS": "VIRTUS CAPITAL.xlsb",
     "ZULU": "ZULU FIP.xlsb",
-    "CREDITOS_COLATERALIZADOS": "CREDITOS COLATERALIZADOS I FIDC.xlsb"
+    "CREDITOS_COLATERALIZADOS": "CREDITOS COLATERALIZADOS I FIDC.xlsb",
+    "SB CREDITO FIDC": "SB CREDITO FIDC.xlsb"
   },
   "laminas": {
     "AVANTI": "Avanti FIDC",
@@ -64,7 +65,9 @@
     "SB_II": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/SB MULTIESTRATEGIA II/00 - SB MULTI II - CD.xlsx",
     "ZULU": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/ZULU FIP/2025_ZULU FIP_CD.xlsx",
     "VIRTUS": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/VIRTUS CAPITAL/2025_VIRTUS CAPITAL_CD.xlsx",
-    "AVANTI": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/AVANTI FIDC/AVANTI_CD.xlsx"
+    "AVANTI": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/AVANTI FIDC/AVANTI_CD.xlsx",
+    "COBUCCIO FIDC": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/COBUCCIO FIDC/COBUCCIO_FIDC_CD.xlsb",
+    "SB CREDITO FIDC": "01 - OPERACIONAL/CONTROLADORIA/01 - Relatorios Diarios/Carteira Diaria/Fundos Ativos/SB CREDITO FIDC/2025_SB_CREDITO_CD.xlsx"
   },
   "configuracoes_fundos": {
     "FIDARA": {
@@ -78,6 +81,19 @@
         "SELIC",
         "CETIP",
         "Banco Liquidante"
+      ]
+    },
+    "AVANTI": {
+      "contas_pagar": [
+        "Adm",
+        "Administração",
+        "Auditoria",
+        "Gestão",
+        "CVM",
+        "Custódia",
+        "consultoria",
+        "CETIP",
+        "ANBIMA"
       ]
     },
     "CDC": {
@@ -225,8 +241,47 @@
         "CETIP",
         "Consultoria"
       ]
+    },
+    "COBUCCIO FIDC": {
+      "contas_pagar": [
+        "Administração",
+        "ANBIMA",
+        "Auditoria",
+        "Custódia",
+        "Gestão",
+        "CVM",
+        "SELIC",
+        "CETIP",
+        "Banco Liquidante"
+      ]
+    },
+    "SB CREDITO FIDC": {
+      "contas_pagar": [
+        "Administração",
+        "ANBIMA",
+        "Auditoria",
+        "Custódia",
+        "Gestão",
+        "CVM",
+        "consultoria",
+        "SELIC",
+        "CETIP",
+        "LIQUIDAÇAO",
+        "Compensação",
+        "LIQUIDAÇÃO",
+        "Banco Liquidante",
+        "Resgate de Cotas",
+        "Contingencia Judicial"
+      ]
     }
   },
+  "administradoras": [
+    "APEX",
+    "Singulare",
+    "Genial",
+    "Terra",
+    "Avanti"
+  ],
   "destinatarios": [
     "lucas@carmelcapital.com.br",
     "marcelo@carmelcapital.com.br",

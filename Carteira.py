@@ -1,4 +1,5 @@
 """
+
 Módulo de ETL para carteiras de diferentes administradoras.
 
 Hierarquia de classes:
@@ -12,6 +13,7 @@ Hierarquia de classes:
     ├── CarteiraAVANTI     - Administradora Avanti
     ├── CarteiraSingulareQI- Administradora Singulare / QI
     └── CarteiraPORTOFINO  - Administradora Portofino
+
 """
 
 from __future__ import annotations
@@ -221,6 +223,106 @@ class CarteiraBase(ABC):
             logger.info(f"Valor '{codigo}' não encontrado.")
             return 0.0
 
+    def recuperar_valor_carteira(self, codigo: str, coluna: int | str) -> float:
+        """
+        Recupera um valor da planilha física de forma dinâmica e inteligente.
+        Suporta tanto índice numérico (int) quanto o nome exato da coluna (str).
+        Identifica automaticamente o cabeçalho ativo daquela seção caminhando do topo
+        do arquivo até a linha do código, evitando quebras por colunas que oscilam
+        ou mudam de lugar no Excel.
+        """
+        try:
+            df = self.dataframe
+            if df is None or df.empty:
+                return 0.0
+                
+            # Localiza a linha do código
+            # Procura de forma robusta em self._col_chave, na 1ª coluna, ou na 2ª coluna
+            colunas_busca = []
+            if hasattr(self, "_col_chave") and self._col_chave:
+                colunas_busca.append(self._col_chave)
+            colunas_busca.extend([df.columns[0]])
+            if len(df.columns) > 1:
+                colunas_busca.append(df.columns[1])
+                
+            matching_rows = []
+            for col in colunas_busca:
+                # Busca exata
+                matches = df[df[col] == codigo].index.tolist()
+                if not matches:
+                    # Busca case-insensitive com strip
+                    matches = df[df[col].astype(str).str.strip().str.upper() == codigo.strip().upper()].index.tolist()
+                if matches:
+                    matching_rows = matches
+                    break
+                    
+            if not matching_rows:
+                logger.info(f"recuperar_valor_carteira: '{codigo}' não encontrado.")
+                return 0.0
+                
+            row_idx = matching_rows[0]
+            
+            # Se for string (nome da coluna), busca o cabeçalho mais próximo acima de row_idx
+            if isinstance(coluna, str):
+                import unicodedata
+                def _normalizar(s):
+                    if not isinstance(s, str):
+                        return ""
+                    nfkd = unicodedata.normalize('NFKD', s)
+                    return "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
+                    
+                current_headers = None
+                termos_cabecalho = ["descri", "papel", "cod", "administr", "emit", "operac", "venc", "qtd", "taxa", "valor", "pl", "vlr", "pu", "ativo"]
+                
+                for r in range(row_idx + 1):
+                    row_values = df.iloc[r].tolist()
+                    row_str = [_normalizar(str(x)) for x in row_values if not pd.isna(x)]
+                    
+                    # Identifica se é linha de cabeçalho (pelo menos 2 colunas casam com termos-chave)
+                    matching_cols = 0
+                    for x in row_str:
+                        if any(t == x or x.startswith(t) or x.endswith(t) for t in termos_cabecalho):
+                            matching_cols += 1
+                    if matching_cols >= 2:
+                        current_headers = [_normalizar(str(x)) for x in row_values]
+                        
+                if current_headers:
+                    col_name_lower = _normalizar(coluna)
+                    if col_name_lower in current_headers:
+                        c_idx = current_headers.index(col_name_lower)
+                        val = df.iloc[row_idx, c_idx]
+                        from src.core.converters import limpar_valor_monetario
+                        return limpar_valor_monetario(val)
+                    else:
+                        # Tenta busca parcial no cabeçalho
+                        for i, h in enumerate(current_headers):
+                            if col_name_lower in h or h in col_name_lower:
+                                val = df.iloc[row_idx, i]
+                                from src.core.converters import limpar_valor_monetario
+                                return limpar_valor_monetario(val)
+                                
+                # Fallback: busca direta nas colunas do DataFrame
+                colunas_df = [_normalizar(str(c)) for c in df.columns]
+                col_name_lower = _normalizar(coluna)
+                if col_name_lower in colunas_df:
+                    c_idx = colunas_df.index(col_name_lower)
+                    val = df.iloc[row_idx, c_idx]
+                    from src.core.converters import limpar_valor_monetario
+                    return limpar_valor_monetario(val)
+                    
+                logger.warning(f"recuperar_valor_carteira: coluna string '{coluna}' não pôde ser resolvida para '{codigo}'.")
+                return 0.0
+                
+            # Se for int, acessa diretamente pelo índice numérico
+            else:
+                val = df.iloc[row_idx, int(coluna)]
+                from src.core.converters import limpar_valor_monetario
+                return limpar_valor_monetario(val)
+                
+        except Exception as exc:
+            logger.error(f"Erro em recuperar_valor_carteira para '{codigo}' col={coluna}: {exc}")
+            return 0.0
+
     def _recuperar_taxa(
         self,
         categoria: str,
@@ -246,13 +348,15 @@ class CarteiraBase(ABC):
         self,
         df_contas: pd.DataFrame,
         coluna: str = "Histórico", # Ajustado para o nome real
+        coluna_valor: str = "Valor Total",
     ) -> None:
         if df_contas.empty:
             return
 
-        # Passamos a coluna_valor explicitamente aqui se necessário
+        # Passamos a coluna_valor explicitamente aqui
         def taxa(cat: str) -> float:
-            return self._recuperar_taxa(cat, df_contas, coluna, "Valor Total")
+            return self._recuperar_taxa(cat, df_contas, coluna, coluna_valor)
+
 
         self.outros_valores_pagar = taxa("Contas a pagar")
         self.outros_valores_receber = taxa("Contas a receber")
@@ -302,12 +406,7 @@ class _MixinCdAtual:
             logger.error(f"Erro ao converter valores: {exc}")
             return 0.0
 
-    def recuperar_valor_carteira(self, codigo: str, coluna: int) -> float:
-        try:
-            return self.dataframe[self.dataframe["Unnamed: 0"] == codigo].values[0, coluna]
-        except Exception:
-            logger.info(f"'{codigo}' não encontrado.")
-            return 0.0
+    # Herdado de CarteiraBase de forma muito mais robusta e dinâmica (suporta busca por string e colunas móveis)
 
     def recuperar_valor_carteira_coluna(
         self,
@@ -461,6 +560,11 @@ class _MixinParseBRL:
 
     codigos_contas_pagar: list[str]
 
+    # Candidatos de nome para coluna de descrição e de valor no bloco contas_pagar
+    _CANDIDATOS_DESCRICAO = ["Historico", "Histórico", "Segmento", "Descrição", "Descricao", "DESCRIÇÃO", "CATEGORIA"]
+    _CANDIDATOS_VALOR     = ["Valor Total", "Valor", "Valor Mov", "Vlr Mov",
+                              "Valor Financeiro", "Vlr Financeiro", "VALOR"]
+
     @staticmethod
     def _resetar(df: pd.DataFrame) -> pd.DataFrame:
         return _resetar_cabecalho(df)
@@ -490,6 +594,45 @@ class _MixinParseBRL:
         return _classificar_contas(
             df, coluna_descricao, coluna_valor, self.codigos_contas_pagar
         )
+
+    @staticmethod
+    def _detectar_coluna(df: pd.DataFrame, candidatos: list[str]) -> str | None:
+        """Retorna o primeiro candidato que existe como coluna em *df* (case-insensitive)."""
+        colunas = list(df.columns)
+        # Passagem exata
+        for c in candidatos:
+            if c in colunas:
+                return c
+        # Passagem case-insensitive (cobre acentuação variada)
+        colunas_lower = [str(c).lower() for c in colunas]
+        for c in candidatos:
+            try:
+                idx = colunas_lower.index(c.lower())
+                return colunas[idx]
+            except ValueError:
+                continue
+        return None
+
+    def recuperar_contas(
+        self,
+        categoria: str,
+        df: pd.DataFrame,
+        coluna_descricao: str = "Histórico",
+        coluna_valor: str = "Valor Total",
+    ) -> float:
+        """
+        Retorna o valor da *categoria* no DataFrame de contas filtrado.
+        Auto-detecta as colunas de descrição e valor caso as padrão informadas não existam.
+        """
+        try:
+            c_desc = coluna_descricao if coluna_descricao in df.columns else (self._detectar_coluna(df, self._CANDIDATOS_DESCRICAO) or coluna_descricao)
+            c_val = coluna_valor if coluna_valor in df.columns else (self._detectar_coluna(df, self._CANDIDATOS_VALOR) or coluna_valor)
+            
+            filtro = df[c_desc].str.contains(categoria, case=False, na=False)
+            resultado = df.loc[filtro, c_val]
+            return float(resultado.sum())
+        except Exception:
+            return 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -657,11 +800,6 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
         self.patrimonio_total = self._buscar_valor_por_descricao("PL Posição", 1)
         self.valor_di = self._buscar_valor_por_descricao("Total RENDA FIXA:", 5)
 
-    # Candidatos de nome para coluna de descrição e de valor no bloco contas_pagar
-    _CANDIDATOS_DESCRICAO = ["Historico", "Histórico", "Segmento", "Descrição", "Descricao", "DESCRIÇÃO"]
-    _CANDIDATOS_VALOR     = ["Valor Total", "Valor", "Valor Mov", "Vlr Mov",
-                              "Valor Financeiro", "Vlr Financeiro", "VALOR"]
-
     def _carregar_contas_brl(self) -> None:
         # Processa Contas a Pagar
         df_cp = self._dataframes.get("contas_pagar", pd.DataFrame())
@@ -691,56 +829,6 @@ class CarteiraBRL(_MixinParseBRL, CarteiraBase):
             if col_seg in df_limpo.columns:
                 df_limpo = df_limpo[~df_limpo[col_seg].astype(str).str.contains("total", case=False, na=False)]
         return df_limpo
-
-    @staticmethod
-    def _detectar_coluna(df: pd.DataFrame, candidatos: list[str]) -> str | None:
-        """Retorna o primeiro candidato que existe como coluna em *df* (case-insensitive)."""
-        colunas = list(df.columns)
-        # Passagem exata
-        for c in candidatos:
-            if c in colunas:
-                return c
-        # Passagem case-insensitive (cobre acentuação variada)
-        colunas_lower = [str(c).lower() for c in colunas]
-        for c in candidatos:
-            try:
-                idx = colunas_lower.index(c.lower())
-                return colunas[idx]
-            except ValueError:
-                continue
-        return None
-
-    # ------------------------------------------------------------------
-    # API pública que o código consumidor já usa
-    # ------------------------------------------------------------------
-
-    def recuperar_valor_carteira(self, codigo: str, coluna: int) -> float:
-        """Retorna o valor na posição *coluna* da linha identificada por *codigo*."""
-        try:
-            col = self._col_chave
-            return self.dataframe[self.dataframe[col] == codigo].values[0, coluna]
-        except Exception:
-            logger.info(f"recuperar_valor_carteira: '{codigo}' não encontrado.")
-            return 0.0
-
-    def recuperar_contas(
-        self,
-        categoria: str,
-        df: pd.DataFrame,
-        coluna_descricao: str = "Histórico", # Verifique se tem acento!
-        coluna_valor: str = "Valor Total",   # Alterado para o nome real
-    ) -> float:
-        """
-        Retorna o valor da *categoria* no DataFrame de contas filtrado.
-        Compatível com a chamada:
-            carteira_fidara.recuperar_contas('Cvm', carteira_fidara.df_contas_filtrado)
-        """
-        try:
-            filtro = df[coluna_descricao].str.contains(categoria, case=False, na=False)
-            resultado = df.loc[filtro, coluna_valor]
-            return float(resultado.sum())
-        except Exception:
-            return 0.0
 
 
 
@@ -1108,24 +1196,47 @@ class CarteiraAVANTI(_MixinParseBRL, CarteiraBase):
 
     def _carregar_data_avanti(self) -> None:
         try:
-            valor = self._recuperar_por_coluna("Data Posição: ", "Unnamed: 1", 5)
-            self.data = datetime.strptime(valor, "%d/%m/%Y").date()
-        except Exception:
-            try:
-                self.data = self._recuperar_por_coluna("Data Posição: ", "Unnamed: 1", 10)
-            except Exception:
+            df = self.dataframe
+            if df is None or df.empty:
                 self.data = None
+                return
+                
+            row_idx, col_idx = None, None
+            for r in range(min(10, len(df))):
+                for c in range(df.shape[1]):
+                    val = df.iloc[r, c]
+                    if isinstance(val, str) and "data posi" in val.lower():
+                        row_idx, col_idx = r, c
+                        break
+                if row_idx is not None:
+                    break
+                    
+            if row_idx is not None:
+                for c in range(col_idx + 1, df.shape[1]):
+                    val = df.iloc[row_idx, c]
+                    if pd.notna(val) and str(val).strip():
+                        val_str = str(val).strip()
+                        try:
+                            if isinstance(val, (datetime, pd.Timestamp)):
+                                self.data = val.date()
+                            else:
+                                self.data = datetime.strptime(val_str, "%d/%m/%Y").date()
+                            logger.info(f"Data Posição carregada dinamicamente: {self.data}")
+                            return
+                        except Exception:
+                            continue
+        except Exception as exc:
+            logger.error(f"Erro ao carregar Data Posição dinamicamente na Avanti: {exc}")
+        self.data = None
 
     def _carregar_contas_avanti(self) -> None:
         df_raw = self._dataframes.get("valores_liquidar", pd.DataFrame())
         df_contas = self._resetar_cabecalho_avanti(df_raw)
         self.df_contas = df_contas
-        self.df_contas_pagar = self._agrupar_contas(
-            df_contas[df_contas["Valor"] < 0], "Descrição", "Valor"
-        )
-        self.df_contas_receber = self._agrupar_contas(
-            df_contas[df_contas["Valor"] > 0], "Descrição", "Valor"
-        )
+        # Para a Avanti, NÃO agrupamos os DataFrames de contas, pois precisamos preservar
+        # as descrições originais específicas das transações (ex: "PAGAMENTO IR - AMORTIZAÇÃO...")
+        self.df_contas_pagar = df_contas[df_contas["Valor"] < 0].copy() if not df_contas.empty else pd.DataFrame()
+        self.df_contas_receber = df_contas[df_contas["Valor"] > 0].copy() if not df_contas.empty else pd.DataFrame()
         # Avanti usa nomes de coluna "Historico"
         self.valor_administracao = self._recup_avanti(self.df_contas_pagar, "Adm")
         self.valor_taxa_cvm = self._recup_avanti(self.df_contas_pagar, "Cvm")
@@ -1137,7 +1248,13 @@ class CarteiraAVANTI(_MixinParseBRL, CarteiraBase):
 
     def _recup_avanti(self, df: pd.DataFrame, taxa: str) -> float:
         try:
-            return df[df["Historico"] == taxa].iloc[0, 1]
+            col_desc = df.columns[0]
+            total = 0.0
+            # Busca case-insensitive parcial para robustez total
+            for idx, row in df.iterrows():
+                if taxa.lower() in str(row[col_desc]).lower():
+                    total += abs(float(row.iloc[1]))
+            return total
         except Exception:
             return 0.0
 
@@ -1197,16 +1314,31 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             self.dataframe = self.dataframe.rename(
                 columns={self.dataframe.columns[0]: "Carteira Diária"}
             )
-            self.data = pd.to_datetime(
-                self.recuperar_valor_carteira_coluna("Saldo em Tesouraria", 2, "Unnamed: 3"),
-                dayfirst=True,
-            )
             self.patrimonio_total = self.recuperar_valor_carteira_coluna("PATRIMON", 12)
             self._dataframes = self._processar_planilha()
             self._carregar_referencias()
             self._carregar_contas_singulare()
+
+            # Recuperação robusta da Data-Base a partir de df_contas_pagar (CPR)
+            df_cp = self._dataframes.get("contas_pagar", pd.DataFrame())
+            if not df_cp.empty and "Data" in df_cp.columns:
+                val = df_cp["Data"].values[0]
+                try:
+                    self.data = pd.to_datetime(val, unit='D', origin='1899-12-30')
+                except Exception:
+                    self.data = pd.to_datetime(val, dayfirst=True)
+            else:
+                # Fallback para leitura da célula de Tesouraria
+                try:
+                    self.data = pd.to_datetime(
+                        self.recuperar_valor_carteira_coluna("Saldo em Tesouraria", 2, "Unnamed: 3"),
+                        dayfirst=True,
+                    )
+                except Exception:
+                    self.data = None
         except Exception as exc:
             raise RuntimeError(f"Erro ao carregar CarteiraSingulareQI: {exc}") from exc
+
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
         df = self.dataframe.reset_index(drop=True)
@@ -1222,14 +1354,26 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             "vccri": "VCCRI",
             "pddcri": "PDCRI",
             "tesouraria": "Tesouraria",
+            "ccven": "CCVEN",
+            "ntn o": "NTN O",
+            "lfto": "LFTO",
+            "vcnc": "VCNC",
+            "pddnc": "PDDNC",
+            "pdd_l": "PDD_L",
+            "vdprz": "VDPRZ",
         }
         linhas: dict[str, int] = {}
         for chave, nome in categorias_codigo.items():
+            # Busca exata
             idx = df.index[df.iloc[:, 0] == nome].tolist()
+            if not idx:
+                # Busca flexível (sem espaços, sem hifens e case-insensitive)
+                nome_clean = str(nome).strip().upper().replace(" ", "").replace("-", "")
+                idx = df.index[df.iloc[:, 0].astype(str).str.strip().str.upper().str.replace(" ", "").str.replace("-", "") == nome_clean].tolist()
             linhas[chave] = idx[0] if idx else len(df)
 
         def extrair(linha: int) -> pd.DataFrame:
-            start = linha + 1
+            start = pointer = linha + 1
             mask = df.iloc[start:, 0].astype(str).str.contains(r"^Totais:$", na=False)
             end = mask.idxmax() if mask.any() else len(df)
             return _extrair_secao(df, start, end)
@@ -1242,6 +1386,7 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
         nomes = [
             "outros_ativos", "outros_fundos", "mezanino", "senior",
             "ntn", "ltno", "nc", "vccri", "pddcri", "tesouraria",
+            "ccven", "ntn o", "lfto", "vcnc", "pddnc", "pdd_l", "vdprz",
         ]
         for nome in nomes:
             setattr(self, f"df_{nome}", self._dataframes.get(nome, pd.DataFrame()))
@@ -1260,8 +1405,19 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             columns={df_cp.columns[idx_cat]: "CATEGORIA", df_cp.columns[idx_val]: "Valor"}
         )
         self.df_contas_filtrado = self._agrupar_contas(df_cp, "CATEGORIA", "Valor")
-        self._popular_taxas(self.df_contas_filtrado)
-        self.pdd = self.recuperar_valor_carteira_coluna("PDD", 11)
+        self._popular_taxas(self.df_contas_filtrado, coluna="CATEGORIA", coluna_valor="Valor")
+
+        # Recupera PDD da mesma forma que o script legado buscando em outros_ativos
+        df_oa = self._dataframes.get("outros_ativos", pd.DataFrame())
+        try:
+            col_val = df_oa.columns.get_loc("Valor Total")
+            self.pdd = self.recuperar_valor_carteira_coluna("PDD", col_val, "Código", df_oa)
+        except Exception:
+            try:
+                self.pdd = self.recuperar_valor_carteira_coluna("PDD", 11)
+            except Exception:
+                self.pdd = 0.0
+
 
     def acrescentar_contas_cotas(self, *codigos: str) -> None:
         self.codigos_cotas.extend(codigos)
@@ -1279,6 +1435,62 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
         except Exception:
             logger.info(f"'{codigo}' não encontrado.")
             return 0
+
+    def recuperar_valor_carteira(self, codigo: str, coluna: int | str) -> float:
+        # 1. Tenta buscar da forma padrão (na planilha inteira/raw)
+        val = super().recuperar_valor_carteira(codigo, coluna)
+        if val != 0.0:
+            return val
+
+        # 2. Se não encontrou, busca nos DataFrames das subseções estruturadas da Singulare
+        from src.core.converters import limpar_valor_monetario
+        
+        secoes = [
+            "outros_ativos", "outros_fundos", "mezanino", "senior",
+            "nc", "vcnc", "pddnc", "pdd_l", "vdprz", "ntn", "ltno",
+            "ntn o", "vccri", "pddcri", "tesouraria", "ccven", "lfto"
+        ]
+        
+        codigo_normalizado = str(codigo).strip().upper()
+        
+        for secao in secoes:
+            df = self._dataframes.get(secao)
+            if df is None or df.empty:
+                continue
+            
+            # Procura em todas as colunas do DataFrame da seção
+            for col in df.columns:
+                mask = df[col].astype(str).str.strip().str.upper() == codigo_normalizado
+                matching_rows = df[mask]
+                if not matching_rows.empty:
+                    row = matching_rows.iloc[0]
+                    
+                    if isinstance(coluna, str):
+                        import unicodedata
+                        def _normalizar(s):
+                            if not isinstance(s, str):
+                                return ""
+                            nfkd = unicodedata.normalize('NFKD', s)
+                            return "".join([c for c in nfkd if not unicodedata.combining(c)]).lower().strip()
+                        
+                        coluna_normalizada = _normalizar(coluna)
+                        colunas_df_normalizadas = [_normalizar(c) for c in df.columns]
+                        
+                        # Busca exata
+                        if coluna_normalizada in colunas_df_normalizadas:
+                            c_idx = colunas_df_normalizadas.index(coluna_normalizada)
+                            return limpar_valor_monetario(row.iloc[c_idx])
+                        
+                        # Busca parcial no cabeçalho
+                        for i, h in enumerate(colunas_df_normalizadas):
+                            if coluna_normalizada in h or h in coluna_normalizada:
+                                return limpar_valor_monetario(row.iloc[i])
+                    else:
+                        idx = int(coluna)
+                        if idx < len(row):
+                            return limpar_valor_monetario(row.iloc[idx])
+                            
+        return 0.0
 
     def somar_coluna_dataframe(self, codigo: str, coluna: str) -> float:
         try:

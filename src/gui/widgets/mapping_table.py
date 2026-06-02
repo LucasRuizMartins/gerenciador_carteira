@@ -39,6 +39,7 @@ INV_MAP_DFS = {v: k for k, v in MAP_DFS.items()}
 FONTES = [
     "atributo", "taxa", "fixo", "custom",
     "valor_carteira", "cotas", "contas",
+    "soma_secao", "api_json",
 ]
 
 _COLOR_MODIFIED = QColor("#f0a50030")   # amarelo translúcido
@@ -144,6 +145,8 @@ class MappingTable(QTableWidget):
             item.get("nome_funcao") or
             item.get("chave_etl") or
             item.get("coluna_valor") or
+            item.get("secao") or
+            item.get("caminho_json") or
             item.get("filtro") or
             str(item.get("valor_fixo", ""))
         )
@@ -215,6 +218,15 @@ class MappingTable(QTableWidget):
             elif fonte == "contas":
                 item["filtro"] = filt or campo
                 item["dataframe"] = df_name
+            elif fonte == "soma_secao":
+                item["secao"] = campo
+                if col:
+                    try: item["coluna"] = int(col)
+                    except ValueError: item["coluna"] = col
+            elif fonte == "api_json":
+                item["caminho_json"] = campo
+                if filt:
+                    item["filtro"] = filt
 
             if mult:
                 try: item["multiplicador"] = float(mult)

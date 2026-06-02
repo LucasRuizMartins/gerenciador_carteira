@@ -265,7 +265,7 @@ class ConfigDrivenBuilder:
             a_receber = 0
             try: a_receber = float(c.dataframe[c.dataframe["Unnamed: 1"] == "PAGAMENTO TAXA ADMINISTRAÇÃO - PAGO A MAIOR "].iloc[0, 81])
             except: pass
-            a_receber += self._engine._resolver_contas(c, FakeItem(filtro="Pagamento ir - amortização", dataframe="df_contas_receber"))
+            a_receber += self._engine._resolver_contas(c, FakeItem(filtro="amortiz", dataframe="df_contas_receber"))
             return a_receber
 
         # Registro Avanti
@@ -289,6 +289,69 @@ class ConfigDrivenBuilder:
         # Restaurando Residence (acidentalmente removidos)
         reg("resolver_ilha_do_sol_residence", resolver_ilha_do_sol_residence)
         reg("resolver_outras_despesas_residence", resolver_outras_despesas_residence)
+
+        # --- Lógica COBUCCIO ---
+        def resolver_cobuccio_soma_secao(c, item):
+            return c.somar_coluna_dataframe(item.chave_etl, 'Valor Líquido')
+
+        def resolver_cobuccio_valor_senior(c, _):
+            try: return c.df_senior['Valor Bruto'].sum()
+            except: return 0.0
+
+        def resolver_cobuccio_senior(c, item):
+            try:
+                filtro = getattr(item, "filtro", None)
+                if not filtro:
+                    num = item.categoria.split(" ")[-1]
+                    filtro = f"Senior {num}"
+                return float(c.df_senior.loc[c.df_senior["CATEGORIA"] == filtro, "PU Mercado"].values[0])
+            except: return 0.0
+
+        reg("resolver_cobuccio_soma_secao", resolver_cobuccio_soma_secao)
+        reg("resolver_cobuccio_valor_senior", resolver_cobuccio_valor_senior)
+        reg("resolver_cobuccio_senior", resolver_cobuccio_senior)
+
+        # --- Lógica SB CREDITO FIDC ---
+        def resolver_sb_valor_senior(c, _):
+            try: return c.df_senior['Valor Bruto'].sum()
+            except: return 0.0
+
+        def resolver_sb_valor_mezanino(c, _):
+            try: return c.df_mezanino['Valor Bruto'].sum()
+            except: return 0.0
+
+        def resolver_sb_senior(c, item):
+            try:
+                filtro = getattr(item, "filtro", None)
+                if not filtro:
+                    filtro = item.categoria
+                mask = c.df_senior["CATEGORIA"].str.upper() == filtro.upper()
+                return float(c.df_senior.loc[mask, "PU Mercado"].values[0])
+            except:
+                try:
+                    mask = c.df_senior["CATEGORIA"].str.upper() == filtro.upper()
+                    return float(c.df_senior.loc[mask, "Pu Mercado"].values[0])
+                except: return 0.0
+
+        def resolver_sb_mezanino(c, item):
+            try:
+                filtro = getattr(item, "filtro", None)
+                if not filtro:
+                    filtro = item.categoria
+                mask = c.df_mezanino["CATEGORIA"].str.upper() == filtro.upper()
+                return float(c.df_mezanino.loc[mask, "PU Mercado"].values[0])
+            except:
+                try:
+                    mask = c.df_mezanino["CATEGORIA"].str.upper() == filtro.upper()
+                    return float(c.df_mezanino.loc[mask, "Pu Mercado"].values[0])
+                except: return 0.0
+
+        reg("resolver_sb_valor_senior", resolver_sb_valor_senior)
+        reg("resolver_sb_valor_mezanino", resolver_sb_valor_mezanino)
+        reg("resolver_sb_senior", resolver_sb_senior)
+        reg("resolver_sb_mezanino", resolver_sb_mezanino)
+
+
 
     # ------------------------------------------------------------------
     # Construtores alternativos

@@ -90,6 +90,11 @@
     },
     {
       "categoria": "Taxa de Administração",
+      "fonte": "custom",
+      "nome_funcao": "resolver_avanti_taxa_adm"
+    },
+    {
+      "categoria": "Taxa de Administração",
       "fonte": "taxa",
       "campo": "valor_administracao"
     },
@@ -115,7 +120,7 @@
     },
     {
       "categoria": "Outras despesas  (-)",
-      "fonte": "taxa",
+      "fonte": "atributo",
       "campo": "outros_valores_pagar"
     },
     {

@@ -57,6 +57,7 @@ FonteTipo = Literal[
     "fixo",           # Valor constante definido no JSON
     "custom",         # Delega para função Python registrada no engine
     "api_json",       # Extrai valor do JSON da API usando caminho de pontos e filtros
+    "soma_secao",     # Soma uma coluna inteira de uma seção do _dataframes (ex: COBUCCIO over/ntn)
 ]
 
 FonteDF = Literal[
@@ -115,9 +116,9 @@ class ItemMapeamento(BaseModel):
             "Exemplo: 'FIDC BRL2954 - RESIDENCE CLUB FIDC : ... - SR 03'."
         ),
     )
-    coluna: int | None = Field(
+    coluna: int | str | None = Field(
         default=None,
-        description="Índice numérico da coluna de valor (0-based) na planilha.",
+        description="Índice numérico da coluna de valor (0-based) ou o nome exato da coluna na planilha.",
     )
 
     # --- Campos para fonte="cotas" ---
@@ -173,6 +174,16 @@ class ItemMapeamento(BaseModel):
         description=(
             "Nome da função Python registrada no MappingEngine via "
             "register_custom_resolver(). Para lógica não-declarativa."
+        ),
+    )
+
+    # --- Campos para fonte="soma_secao" ---
+    secao: str | None = Field(
+        default=None,
+        description=(
+            "Chave do DataFrame em carteira._dataframes a somar. "
+            "Exemplo: 'ntn', 'ltno', 'lfto', 'ccven'. "
+            "Use junto com 'coluna' (nome da coluna a somar)."
         ),
     )
 
@@ -240,6 +251,12 @@ class ItemMapeamento(BaseModel):
 
         if self.fonte == "api_json" and not self.caminho_json:
             erros.append("fonte='api_json' requer 'caminho_json'.")
+
+        if self.fonte == "soma_secao":
+            if not self.secao:
+                erros.append("fonte='soma_secao' requer 'secao' (chave no _dataframes).")
+            if not self.coluna:
+                erros.append("fonte='soma_secao' requer 'coluna' (nome da coluna a somar).")
 
         if erros:
             raise ValueError(

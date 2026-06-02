@@ -48,16 +48,28 @@ class _FundoDialog(QDialog):
 
     def __init__(
         self,
-        apis_disponiveis: list[tuple[str, str]],
+        administradoras: list[str],
         entry: dict | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
-        self._apis = apis_disponiveis
+        self._adms = administradoras
         self._editando = entry is not None
         self.setWindowTitle("Editar Fundo" if self._editando else "Novo Fundo")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(550)
         self.setModal(True)
+        
+        # Se estiver editando, busca o caminho_carteira atual no config.json
+        if entry:
+            from src.config.settings import configuracoes
+            try:
+                cfg = configuracoes()
+                chave_gerencial = entry.get("chave_gerencial", "")
+                caminho = cfg.get("carteiras", {}).get(chave_gerencial, "")
+                entry["caminho_carteira"] = caminho
+            except Exception:
+                entry["caminho_carteira"] = ""
+                
         self._setup_ui(entry or {})
 
     def _setup_ui(self, entry: dict) -> None:
@@ -66,7 +78,7 @@ class _FundoDialog(QDialog):
         layout.setSpacing(20)
 
         # Título
-        titulo = QLabel("✏️ Editar Fundo" if self._editando else "➕ Novo Fundo via API")
+        titulo = QLabel("✏️ Editar Fundo" if self._editando else "➕ Novo Fundo")
         titulo.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
         titulo.setStyleSheet(f"color: {COLORS['text']};")
         layout.addWidget(titulo)
@@ -106,33 +118,49 @@ class _FundoDialog(QDialog):
         self._ed_nome = _field("Ex: Novo FIDC Capital", entry.get("nome", ""))
         form.addRow(_label("Nome de Exibição:"), self._ed_nome)
 
-        # Tipo de API (dropdown)
-        self._cb_api = QComboBox()
-        self._cb_api.setFixedHeight(36)
-        for tipo, rotulo in self._apis:
-            self._cb_api.addItem(rotulo, userData=tipo)
-        # Seleciona o tipo atual se estiver editando
-        tipo_atual = entry.get("tipo_api", "apex")
-        for i in range(self._cb_api.count()):
-            if self._cb_api.itemData(i) == tipo_atual:
-                self._cb_api.setCurrentIndex(i)
+        # Administradora (dropdown)
+        self._cb_adm = QComboBox()
+        self._cb_adm.setFixedHeight(36)
+        for adm in self._adms:
+            self._cb_adm.addItem(adm, userData=adm)
+        # Seleciona a administradora atual se estiver editando
+        adm_atual = entry.get("administrador", "APEX")
+        idx_selecionado = 0
+        for i in range(self._cb_adm.count()):
+            if self._cb_adm.itemText(i).upper() == adm_atual.upper():
+                idx_selecionado = i
                 break
-        form.addRow(_label("Administradora (API):"), self._cb_api)
+        self._cb_adm.setCurrentIndex(idx_selecionado)
+        form.addRow(_label("Administradora:"), self._cb_adm)
 
         # doc_fundo_api (CNPJ / identificador)
-        self._ed_doc = _field("CNPJ ou identificador da API (apenas números)", entry.get("doc_fundo_api", ""))
+        self._ed_doc = _field("CNPJ (apenas para APEX / API)", entry.get("doc_fundo_api", ""))
         form.addRow(_label("ID na API (CNPJ):"), self._ed_doc)
 
         # chave_gerencial
-        self._ed_gerencial = _field("Chave do Excel de destino (ex: VIRTUS)", entry.get("chave_gerencial", ""))
+        self._ed_gerencial = _field("Chave do Excel de destino (ex: COBUCCIO FIDC)", entry.get("chave_gerencial", ""))
         form.addRow(_label("Chave Gerencial:"), self._ed_gerencial)
+
+        # Caminho da Carteira Diária (com selecionador)
+        self._ed_carteira = _field("Caminho relativo da carteira diária (.xlsx, .xlsb, .csv)", entry.get("caminho_carteira", ""))
+        
+        btn_selecionar = QPushButton("📁 ...")
+        btn_selecionar.setFixedWidth(50)
+        btn_selecionar.setFixedHeight(36)
+        btn_selecionar.clicked.connect(self._on_selecionar_arquivo)
+        
+        carteira_layout = QHBoxLayout()
+        carteira_layout.addWidget(self._ed_carteira)
+        carteira_layout.addWidget(btn_selecionar)
+        form.addRow(_label("Carteira Diária:"), carteira_layout)
 
         layout.addLayout(form)
 
         # Nota informativa
         nota = QLabel(
-            "💡 A chave gerencial deve corresponder à entrada no config.json "
-            "que aponta para o arquivo Excel de destino."
+            "💡 Para fundos de arquivo local (Singulare, Genial, etc.), preencha o campo **Carteira Diária** "
+            "clicando na pasta 📁. O sistema converterá automaticamente para um caminho dinâmico relativo "
+            "para funcionar perfeitamente com outros usuários!"
         )
         nota.setWordWrap(True)
         nota.setStyleSheet(f"color: {COLORS['text_muted']}; font-size: 11px;")
@@ -148,14 +176,76 @@ class _FundoDialog(QDialog):
         btns.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
         layout.addWidget(btns)
 
+    def _on_selecionar_arquivo(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+        from src.config.settings import configuracoes_validadas
+        import os
+        from pathlib import Path
+        
+        try:
+            cfg = configuracoes_validadas()
+            root_dir = cfg.paths.root_dir
+            perfil_usuario = os.environ.get("USERPROFILE", os.path.expanduser("~"))
+            diretorio_inicial = str(Path(perfil_usuario) / root_dir)
+        except Exception:
+            diretorio_inicial = ""
+            
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Selecionar Carteira Diária",
+            diretorio_inicial,
+            "Arquivos de Planilha (*.xlsx *.xlsb *.xlsm *.csv);;Todos os arquivos (*)"
+        )
+        
+        if file_path:
+            caminho_relativo = self._obter_caminho_relativo(file_path)
+            self._ed_carteira.setText(caminho_relativo)
+
+    def _obter_caminho_relativo(self, caminho_absoluto: str) -> str:
+        from src.config.settings import configuracoes_validadas
+        import os
+        from pathlib import Path
+        
+        try:
+            cfg = configuracoes_validadas()
+            root_dir = cfg.paths.root_dir
+            perfil_usuario = os.environ.get("USERPROFILE", os.path.expanduser("~"))
+            base_dir = Path(perfil_usuario) / root_dir
+            
+            abs_path = Path(caminho_absoluto).resolve()
+            base_dir_resolved = base_dir.resolve()
+            
+            try:
+                rel_path = abs_path.relative_to(base_dir_resolved)
+                return str(rel_path).replace("\\", "/")
+            except ValueError:
+                # Fallback: se tiver subpasta conhecida
+                partes = abs_path.parts
+                for i, part in enumerate(partes):
+                    if "01 - OPERACIONAL" in part:
+                        return "/".join(partes[i:]).replace("\\", "/")
+                
+                try:
+                    rel_user = abs_path.relative_to(Path(perfil_usuario).resolve())
+                    return str(rel_user).replace("\\", "/")
+                except ValueError:
+                    pass
+                
+                return abs_path.name
+        except Exception:
+            return os.path.basename(caminho_absoluto)
+
     def entry(self) -> dict:
         """Retorna o dict com os dados preenchidos no formulário."""
+        adm = self._cb_adm.currentData()
         return {
             "chave":          self._ed_chave.text().upper().strip().replace(" ", "_"),
             "nome":           self._ed_nome.text().strip(),
-            "tipo_api":       self._cb_api.currentData(),
+            "administrador":  adm,
+            "tipo_api":       adm.lower(),
             "doc_fundo_api":  self._ed_doc.text().strip(),
             "chave_gerencial": self._ed_gerencial.text().strip().upper(),
+            "caminho_carteira": self._ed_carteira.text().strip(),
         }
 
 
@@ -165,20 +255,21 @@ class _FundoDialog(QDialog):
 
 class FundosPage(QWidget):
     """
-    Página de gerenciamento de fundos externos (Multi-API).
+    Página de gerenciamento de fundos externos (Multi-API / Arquivos Locais).
 
     Exibe uma tabela com todos os fundos cadastrados pelo usuário,
     com ações de adicionar, editar, excluir e testar conexão.
     """
 
     # Colunas da tabela
-    _COLUNAS = ["Chave", "Nome", "API", "ID na API", "Chave Gerencial", "Ações"]
-    _COL_CHAVE      = 0
-    _COL_NOME       = 1
-    _COL_API        = 2
-    _COL_DOC        = 3
-    _COL_GERENCIAL  = 4
-    _COL_ACOES      = 5
+    _COLUNAS = ["Chave", "Nome", "Administrador", "API", "ID na API", "Chave Gerencial", "Ações"]
+    _COL_CHAVE          = 0
+    _COL_NOME           = 1
+    _COL_ADMINISTRADOR  = 2
+    _COL_API            = 3
+    _COL_DOC            = 4
+    _COL_GERENCIAL      = 5
+    _COL_ACOES          = 6
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -197,12 +288,12 @@ class FundosPage(QWidget):
         root.setSpacing(20)
 
         # Cabeçalho
-        title = QLabel("🏦 Fundos via API")
+        title = QLabel("🏦 Gestão de Fundos")
         title.setObjectName("page_title")
 
         subtitle = QLabel(
-            "Cadastre fundos de qualquer administradora com integração via API. "
-            "Os fundos cadastrados ficam disponíveis em Ingestão API e Mapeamento API."
+            "Cadastre e gerencie fundos integrados via API (como Apex) ou fundos de arquivos locais "
+            "(como Singulare, Genial, Terra, Avanti). Os fundos configurados ficam disponíveis no Launcher de Lançamentos."
         )
         subtitle.setObjectName("page_subtitle")
         subtitle.setWordWrap(True)
@@ -211,10 +302,19 @@ class FundosPage(QWidget):
 
         # Barra de ações (topo)
         top_bar = QHBoxLayout()
+        
+        self._btn_cadastrar_adm = QPushButton("🏢 Cadastrar Administradora")
+        self._btn_cadastrar_adm.setFixedHeight(40)
+        self._btn_cadastrar_adm.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        self._btn_cadastrar_adm.setObjectName("btn_secondary")
+        self._btn_cadastrar_adm.clicked.connect(self._on_cadastrar_administradora)
+        
         self._btn_novo = QPushButton("➕  Novo Fundo")
         self._btn_novo.setFixedHeight(40)
         self._btn_novo.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
         self._btn_novo.clicked.connect(self._on_novo)
+        
+        top_bar.addWidget(self._btn_cadastrar_adm)
         top_bar.addStretch()
         top_bar.addWidget(self._btn_novo)
         root.addLayout(top_bar)
@@ -257,8 +357,8 @@ class FundosPage(QWidget):
 
         # Rodapé com nota
         nota = QLabel(
-            "💡 Após cadastrar um novo fundo, vá em Mapeamento API para "
-            "configurar quais campos do JSON devem ser gravados no Excel."
+            "💡 Para fundos locais (Singulare, Genial, etc.), preencha o caminho da Carteira Diária. "
+            "Para fundos de API (Apex), após cadastrar, vá em Mapeamento API para configurar a gravação."
         )
         nota.setStyleSheet(f"color: {COLORS['text_muted']}; font-size: 11px;")
         nota.setWordWrap(True)
@@ -281,7 +381,7 @@ class FundosPage(QWidget):
     # ------------------------------------------------------------------
 
     def _on_novo(self) -> None:
-        dialog = _FundoDialog(self._vm.apis_disponiveis(), parent=self)
+        dialog = _FundoDialog(self._vm.listar_administradoras(), parent=self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self._vm.salvar(dialog.entry())
 
@@ -290,7 +390,7 @@ class FundosPage(QWidget):
         entry = next((f for f in fundos if f.get("chave") == chave), None)
         if not entry:
             return
-        dialog = _FundoDialog(self._vm.apis_disponiveis(), entry=entry, parent=self)
+        dialog = _FundoDialog(self._vm.listar_administradoras(), entry=entry, parent=self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self._vm.salvar(dialog.entry())
 
@@ -319,7 +419,7 @@ class FundosPage(QWidget):
 
     def _on_salvo(self, chave: str) -> None:
         QMessageBox.information(
-            self, "Salvo", f"Fundo '{chave}' cadastrado com sucesso!\n\nJá disponível em Ingestão API."
+            self, "Salvo", f"Fundo '{chave}' salvo e configurado com sucesso!"
         )
 
     def _on_removido(self, chave: str) -> None:
@@ -359,6 +459,29 @@ class FundosPage(QWidget):
     # Atualização da tabela
     # ------------------------------------------------------------------
 
+    def _on_cadastrar_administradora(self) -> None:
+        from PySide6.QtWidgets import QInputDialog
+        nome, ok = QInputDialog.getText(
+            self,
+            "Cadastrar Administradora",
+            "Nome da nova administradora (ex: Singulare, Genial, Terra, Avanti):",
+        )
+        if ok and nome.strip():
+            nome_adm = nome.strip()
+            try:
+                self._vm.cadastrar_administradora(nome_adm)
+                QMessageBox.information(
+                    self,
+                    "Sucesso",
+                    f"Administradora '{nome_adm}' cadastrada com sucesso!"
+                )
+            except Exception as exc:
+                QMessageBox.critical(
+                    self,
+                    "Erro ao Cadastrar",
+                    f"Não foi possível cadastrar a administradora:\n\n{exc}"
+                )
+
     def _atualizar_tabela(self, fundos: list[dict]) -> None:
         from src.registry import ROTULOS_APIS
 
@@ -367,19 +490,26 @@ class FundosPage(QWidget):
         for row, fundo in enumerate(fundos):
             chave      = fundo.get("chave", "")
             nome       = fundo.get("nome", "")
+            adm        = fundo.get("administrador", "APEX")
             tipo_api   = fundo.get("tipo_api", "apex")
             doc        = fundo.get("doc_fundo_api", "")
             gerencial  = fundo.get("chave_gerencial", "")
-            rotulo_api = ROTULOS_APIS.get(tipo_api, tipo_api)
+            
+            # API label format: show "Apex (Prisma)" for apex, otherwise "Sem API (Ingestão Local)" or similar
+            if adm.upper() == "APEX":
+                rotulo_api = ROTULOS_APIS.get(tipo_api.lower(), "Apex (Prisma)")
+            else:
+                rotulo_api = "Sem API"
 
-            self._tabela.setItem(row, self._COL_CHAVE,     QTableWidgetItem(chave))
-            self._tabela.setItem(row, self._COL_NOME,      QTableWidgetItem(nome))
-            self._tabela.setItem(row, self._COL_API,       QTableWidgetItem(rotulo_api))
-            self._tabela.setItem(row, self._COL_DOC,       QTableWidgetItem(doc))
-            self._tabela.setItem(row, self._COL_GERENCIAL, QTableWidgetItem(gerencial))
+            self._tabela.setItem(row, self._COL_CHAVE,         QTableWidgetItem(chave))
+            self._tabela.setItem(row, self._COL_NOME,          QTableWidgetItem(nome))
+            self._tabela.setItem(row, self._COL_ADMINISTRADOR, QTableWidgetItem(adm))
+            self._tabela.setItem(row, self._COL_API,           QTableWidgetItem(rotulo_api))
+            self._tabela.setItem(row, self._COL_DOC,           QTableWidgetItem(doc))
+            self._tabela.setItem(row, self._COL_GERENCIAL,     QTableWidgetItem(gerencial))
 
             # Centraliza certas colunas
-            for col in (self._COL_CHAVE, self._COL_API, self._COL_GERENCIAL):
+            for col in (self._COL_CHAVE, self._COL_ADMINISTRADOR, self._COL_API, self._COL_GERENCIAL):
                 item = self._tabela.item(row, col)
                 if item:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)

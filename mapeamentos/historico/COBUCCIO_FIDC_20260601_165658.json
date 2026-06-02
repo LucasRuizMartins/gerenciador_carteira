@@ -1,0 +1,403 @@
+{
+  "versao": "1.0",
+  "fundo": "COBUCCIO_FIDC",
+  "administradora": "SINGULARE",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer",
+      "fonte": "valor_carteira",
+      "chave_etl": "COBUAVE",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos",
+      "fonte": "valor_carteira",
+      "chave_etl": "COBUVENC",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_soma_secao",
+      "chave_etl": "ccven"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Debenture",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Juros s/ Deb",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PDD - Prov. de Perdas",
+      "fonte": "atributo",
+      "campo": "pdd"
+    },
+    {
+      "categoria": "GV Cash FIRF DI LP",
+      "fonte": "valor_carteira",
+      "chave_etl": "SOCDILP",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "NTN-B",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_soma_secao",
+      "chave_etl": "ntn"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "atributo",
+      "campo": "saldo_tesouraria"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_soma_secao",
+      "chave_etl": "ltno"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_soma_secao",
+      "chave_etl": "ntn o"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_soma_secao",
+      "chave_etl": "lfto"
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_valor_senior"
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "taxa",
+      "campo": "valor_administracao"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "taxa",
+      "campo": "valor_taxa_custodia"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "taxa",
+      "campo": "valor_taxa_gestao"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "taxa",
+      "campo": "valor_taxa_auditoria"
+    },
+    {
+      "categoria": "Despesa CVM - Diferimento",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Dif. Despesa Fisc. CVM",
+      "fonte": "taxa",
+      "campo": "valor_taxa_cvm"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "TAXA SELIC",
+      "fonte": "taxa",
+      "campo": "valor_selic"
+    },
+    {
+      "categoria": "TAXA CETIP",
+      "fonte": "taxa",
+      "campo": "valor_cetip"
+    },
+    {
+      "categoria": "Banco Liquidante",
+      "fonte": "taxa",
+      "campo": "valor_liq_banco"
+    },
+    {
+      "categoria": "Dif. Despesa ANBIMA",
+      "fonte": "taxa",
+      "campo": "valor_anbima"
+    },
+    {
+      "categoria": "Taxa de Performance",
+      "fonte": "taxa",
+      "campo": "valor_taxa_performance"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "contas",
+      "filtro": "Contas a receber",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "contas",
+      "filtro": "Contas a pagar",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "PL Carteira Subordinada",
+      "fonte": "atributo",
+      "campo": "patrimonio_total"
+    },
+    {
+      "categoria": "Despesa CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Despesa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Resgate/Amortização de Cotas (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS",
+      "fonte": "valor_carteira",
+      "chave_etl": "Qtd Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "COTA SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Vlr Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "AMORTIZ. DIA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 1",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 1"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0001
+    },
+    {
+      "categoria": "RETORNO DIARIO SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 3",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 3"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 4",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 4"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 5",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 5"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 6",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 6"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 7",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 7"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 8",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 8"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

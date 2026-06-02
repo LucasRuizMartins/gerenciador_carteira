@@ -3,9 +3,9 @@ ViewModel para execução de fundos.
 Roda processar_fundo_registrado() em QThread separada
 e emite sinais de progresso/resultado para a View.
 """
+from __future__ import annotations
 from typing import Any
 # pyrefly: ignore [invalid-syntax]
-from __future__ import annotations
 
 import os
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, Signal, Slot
@@ -85,9 +85,29 @@ class LauncherViewModel(QObject):
         for nome, aba in fundos_abas.items():
             self.executar(nome, aba)
 
+    def _eh_fundo_api(self, cfg: Any) -> bool:
+        """Retorna True se o fundo for operado via API (APEX + doc_fundo_api preenchido)."""
+        adm = getattr(cfg, "administrador_efetivo", "APEX").upper()
+        doc = getattr(cfg, "doc_fundo_api", None)
+        return adm == "APEX" and bool(doc)
+
     def fundos_disponiveis(self) -> list[str]:
         from src.registry import REGISTRO
-        return list(REGISTRO.keys())
+        return [chave for chave, cfg in REGISTRO.items() if not self._eh_fundo_api(cfg)]
+        
+    def fundos_agrupados(self) -> dict[str, list[str]]:
+        """Retorna os fundos (excluindo os de API) agrupados por administradora."""
+        from src.registry import REGISTRO
+        agrupados = {}
+        for chave, cfg in REGISTRO.items():
+            if self._eh_fundo_api(cfg):
+                # Ignora fundos de API
+                continue
+            adm = getattr(cfg, "administrador_efetivo", "OUTROS")
+            if adm not in agrupados:
+                agrupados[adm] = []
+            agrupados[adm].append(chave)
+        return agrupados
         
     def obter_abas_excel(self, nome_fundo: str) -> list[str]:
         """Retorna a lista de abas reais do arquivo Excel do fundo."""

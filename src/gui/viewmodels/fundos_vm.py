@@ -103,6 +103,44 @@ class FundosViewModel(QObject):
         from src.registry import ROTULOS_APIS
         return list(ROTULOS_APIS.items())
 
+    def listar_administradoras(self) -> list[str]:
+        """Retorna a lista de administradoras cadastradas no config.json."""
+        from src.config.settings import configuracoes
+        try:
+            cfg = configuracoes()
+            return cfg.get("administradoras", ["APEX", "Singulare", "Genial", "Terra", "Avanti"])
+        except Exception:
+            return ["APEX", "Singulare", "Genial", "Terra", "Avanti"]
+
+    def cadastrar_administradora(self, nome: str) -> None:
+        """Adiciona uma nova administradora no config.json."""
+        import json
+        from src.config.settings import RAIZ_PROJETO, invalidar_cache
+        
+        nome_limpo = nome.strip()
+        if not nome_limpo:
+            raise ValueError("O nome da administradora não pode estar vazio.")
+            
+        config_path = RAIZ_PROJETO / "config.json"
+        if not config_path.exists():
+            raise FileNotFoundError("Arquivo config.json não encontrado.")
+            
+        with config_path.open("r", encoding="utf-8") as f:
+            dados = json.load(f)
+            
+        adms = dados.get("administradoras", ["APEX", "Singulare", "Genial", "Terra", "Avanti"])
+        nome_upper = nome_limpo.upper()
+        if any(a.upper() == nome_upper for a in adms):
+            raise ValueError(f"Administradora '{nome_limpo}' já está cadastrada.")
+            
+        adms.append(nome_limpo)
+        dados["administradoras"] = adms
+        
+        with config_path.open("w", encoding="utf-8") as f:
+            json.dump(dados, f, ensure_ascii=False, indent=2)
+            
+        invalidar_cache()
+
     def listar(self) -> list[dict]:
         """Retorna a lista de fundos externos cadastrados."""
         from src.registry import listar_fundos_externos
@@ -116,7 +154,7 @@ class FundosViewModel(QObject):
         """
         Salva ou atualiza um fundo no fundos_api.json.
 
-        entry deve conter: chave, nome, tipo_api, doc_fundo_api, chave_gerencial
+        entry deve conter: chave, nome, tipo_api, doc_fundo_api, chave_gerencial, caminho_carteira
         """
         from src.registry import salvar_fundo_externo
 
@@ -124,15 +162,56 @@ class FundosViewModel(QObject):
         if not chave:
             self.erro.emit("A chave do fundo não pode estar vazia.")
             return
-        if not entry.get("doc_fundo_api", "").strip():
-            self.erro.emit("O identificador da API (ex: CNPJ) não pode estar vazio.")
+            
+        adm = entry.get("administrador", "APEX").upper()
+        # APEX exige doc_fundo_api (API), outras administradoras podem usar arquivo local (opcional)
+        if adm == "APEX" and not entry.get("doc_fundo_api", "").strip():
+            self.erro.emit("Para a administradora APEX, o identificador da API (CNPJ) não pode estar vazio.")
             return
+            
         if not entry.get("chave_gerencial", "").strip():
             self.erro.emit("A chave gerencial não pode estar vazia.")
             return
 
         try:
+            # 1. Salva no fundos_api.json e atualiza o REGISTRO em memória
             salvar_fundo_externo(entry)
+            
+            # 2. Salva no config.json (carteiras e arquivo_gerencial)
+            caminho_carteira = entry.get("caminho_carteira", "").strip()
+            chave_gerencial = entry.get("chave_gerencial", "").strip().upper()
+            
+            if chave_gerencial:
+                import json
+                from src.config.settings import RAIZ_PROJETO, invalidar_cache
+                
+                config_path = RAIZ_PROJETO / "config.json"
+                if config_path.exists():
+                    with config_path.open("r", encoding="utf-8") as f:
+                        dados = json.load(f)
+                    
+                    modificado = False
+                    
+                    # Salva o caminho relativo da carteira se informado
+                    if caminho_carteira:
+                        if "carteiras" not in dados:
+                            dados["carteiras"] = {}
+                        dados["carteiras"][chave_gerencial] = caminho_carteira
+                        modificado = True
+                        
+                    # Garante que a chave_gerencial está cadastrada no arquivo_gerencial
+                    if "arquivo_gerencial" not in dados:
+                        dados["arquivo_gerencial"] = {}
+                    if chave_gerencial not in dados["arquivo_gerencial"]:
+                        dados["arquivo_gerencial"][chave_gerencial] = f"{chave_gerencial}.xlsb"
+                        modificado = True
+                        
+                    if modificado:
+                        with config_path.open("w", encoding="utf-8") as f:
+                            json.dump(dados, f, ensure_ascii=False, indent=2)
+                        invalidar_cache()
+                        logger.info(f"config.json atualizado com sucesso para {chave_gerencial}")
+
             self.salvo.emit(chave.upper())
             self.fundos_atualizados.emit(self.listar())
         except Exception as exc:

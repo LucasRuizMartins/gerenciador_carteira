@@ -1,0 +1,565 @@
+{
+  "versao": "1.0",
+  "fundo": "COBUCCIO_FIDC",
+  "administradora": "SINGULARE",
+  "mapeamento_cd": [
+    {
+      "categoria": "Data-Base",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "Direitos Creditórios a Vencer",
+      "fonte": "soma_secao",
+      "secao": "ccven",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos",
+      "fonte": "soma_secao",
+      "secao": "vccri",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860089",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B951544",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B729592",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860086",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B757857",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B859094",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B754120",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B767762",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945325",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B775898",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860080",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860079",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860081",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860082",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860083",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945330",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945329",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945327",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945326",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945333",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945332",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945328",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B705300",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B709326",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B711714",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B860084",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945335",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Brasil Card",
+      "fonte": "valor_carteira",
+      "chave_etl": "B945334",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Debenture",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Direitos Creditórios Vencidos - Juros s/ Deb",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "PDD - Prov. de Perdas",
+      "fonte": "atributo",
+      "campo": "pdd"
+    },
+    {
+      "categoria": "GV Cash FIRF DI LP",
+      "fonte": "soma_secao",
+      "secao": "outros_fundos",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "NTN-B",
+      "fonte": "soma_secao",
+      "secao": "ntn",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "soma_secao",
+      "secao": "ltno",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "soma_secao",
+      "secao": "ntn o",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Over/Compromissada",
+      "fonte": "soma_secao",
+      "secao": "lfto",
+      "coluna": "Valor Líquido"
+    },
+    {
+      "categoria": "Saldo em Tesouraria",
+      "fonte": "atributo",
+      "campo": "saldo_tesouraria"
+    },
+    {
+      "categoria": "Senior (-)",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_valor_senior"
+    },
+    {
+      "categoria": "Mezanino (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa de Administração",
+      "fonte": "taxa",
+      "campo": "valor_administracao"
+    },
+    {
+      "categoria": "Taxa de Custódia",
+      "fonte": "taxa",
+      "campo": "valor_taxa_custodia"
+    },
+    {
+      "categoria": "Taxa de Gestão",
+      "fonte": "taxa",
+      "campo": "valor_taxa_gestao"
+    },
+    {
+      "categoria": "Taxa de Auditoria",
+      "fonte": "taxa",
+      "campo": "valor_taxa_auditoria"
+    },
+    {
+      "categoria": "Despesa CVM - Diferimento",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Dif. Despesa Fisc. CVM",
+      "fonte": "taxa",
+      "campo": "valor_taxa_cvm"
+    },
+    {
+      "categoria": "Taxa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "TAXA SELIC",
+      "fonte": "taxa",
+      "campo": "valor_selic"
+    },
+    {
+      "categoria": "TAXA CETIP",
+      "fonte": "taxa",
+      "campo": "valor_cetip"
+    },
+    {
+      "categoria": "Banco Liquidante",
+      "fonte": "taxa",
+      "campo": "valor_liq_banco"
+    },
+    {
+      "categoria": "Dif. Despesa ANBIMA",
+      "fonte": "taxa",
+      "campo": "valor_anbima"
+    },
+    {
+      "categoria": "Taxa de Performance",
+      "fonte": "taxa",
+      "campo": "valor_taxa_performance"
+    },
+    {
+      "categoria": "Outros valores a receber  (+)",
+      "fonte": "contas",
+      "filtro": "Contas a receber",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "Outras despesas  (-)",
+      "fonte": "contas",
+      "filtro": "Contas a pagar",
+      "dataframe": "df_contas_filtrado"
+    },
+    {
+      "categoria": "PL Carteira Subordinada",
+      "fonte": "atributo",
+      "campo": "patrimonio_total"
+    },
+    {
+      "categoria": "Despesa CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Despesa ANBIMA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Taxa Fisc. CVM",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "Resgate/Amortização de Cotas (-)",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ],
+  "mapeamento_mec": [
+    {
+      "categoria": "DATA",
+      "fonte": "atributo",
+      "campo": "data"
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "QUANT COTAS",
+      "fonte": "valor_carteira",
+      "chave_etl": "Qtd Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "COTA SUBORDINADA",
+      "fonte": "valor_carteira",
+      "chave_etl": "Vlr Cota",
+      "coluna": 1
+    },
+    {
+      "categoria": "AMORTIZ. DIA",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 1",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 1"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 1",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTAS RESGATADAS SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0001
+    },
+    {
+      "categoria": "RETORNO DIARIO SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 2",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 3",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 3"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 3",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 4",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 4"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 4",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 5",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 5"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 5",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 6",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 6"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 6",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 7",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 7"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 7",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE APLICAÇÃO SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "VALOR DE RESGATE SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    },
+    {
+      "categoria": "COTA SENIOR 8",
+      "fonte": "custom",
+      "nome_funcao": "resolver_cobuccio_senior",
+      "filtro": "Senior 8"
+    },
+    {
+      "categoria": "AMORTIZ. DIA SENIOR 8",
+      "fonte": "fixo",
+      "valor_fixo": 0.0
+    }
+  ]
+}

@@ -207,7 +207,10 @@ class ApiMappingViewModel(QObject):
 
     def fundos_api(self) -> list[str]:
         from src.registry import REGISTRO
-        return [k for k, v in REGISTRO.items() if getattr(v, "doc_fundo_api", None)]
+        return [
+            k for k, v in REGISTRO.items()
+            if getattr(v, "doc_fundo_api", None) and getattr(v, "administrador", "APEX").upper() == "APEX"
+        ]
 
     def consultar_api(self, fundo: str, data) -> None:
         """Dispara consulta assíncrona à API. Emite atributos_prontos ou erro."""

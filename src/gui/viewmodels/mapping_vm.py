@@ -152,7 +152,7 @@ class MappingViewModel(QObject):
 
     def fontes_disponiveis(self) -> list[str]:
         """Retorna os tipos de fonte suportados pelo engine."""
-        return ["atributo", "taxa", "fixo", "custom", "valor_carteira", "cotas", "contas"]
+        return ["atributo", "taxa", "fixo", "custom", "valor_carteira", "cotas", "contas", "soma_secao", "api_json"]
 
     def novo_mapeamento(self, fundo: str) -> dict:
         """Retorna um template JSON mínimo para um novo fundo."""

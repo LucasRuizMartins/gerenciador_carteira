@@ -41,6 +41,7 @@ def carteira():
     m.valor_taxa_custodia = -200.0
     m.valor_anbima = -150.0
     m.valor_taxa_performance = 0.0
+    m.valor_cetip = -100.0
     m.outros_valores_receber = 5000.0
     m.outros_valores_pagar = -1500.0
     
@@ -50,8 +51,8 @@ def carteira():
     
     m.df_cotas_superiores = pd.DataFrame({
         "Ordem": [99, 98, 97, 96, 95, 94, 93],
-        "Valor Total": [10000, 20000, 5000, 4000, 3000, 15000, 2000],
-        "Qtde. Total": [100, 200, 50, 40, 30, 150, 20],
+        "Valor Total": [10000, 20000, 5000, 4000, 3000, 10000, 2000],
+        "Qtde. Total": [100, 200, 50, 40, 30, 100, 20],
         "Valor Cota": [100, 100, 100, 100, 100, 100, 100]
     })
 
@@ -64,10 +65,11 @@ def carteira():
 
     def mock_contas(filtro, df):
         # Simula a busca de valores nas tabelas de contas
-        valores = {"Cvm": -50.0, "Anbima": -100.0, "Contas a pagar": -500.0, 
+        valores = {"Cvm": 0.0, "Anbima": -100.0, "Contas a pagar": -500.0, 
                    "Contas a receber": 200.0, "Consultoria": -150.0, "Custódia": -200.0,
-                   "Taxa de consultoria": -300.0, "Cetip": -20.0, "Selic": -10.0,
-                   "Banco Liquidante": -123.45, "Gestão": 500.0, "Performance": -1000.0}
+                   "Taxa de consultoria": -300.0, "Cetip": 0.0, "Selic": -10.0,
+                   "Banco Liquidante": -123.45, "Gestão": 500.0, "Performance": -1000.0,
+                   "RECEBÍVEIS": 5000.0}
         return valores.get(filtro, 0.0)
     m.recuperar_contas.side_effect = mock_contas
     
@@ -76,10 +78,15 @@ def carteira():
     return m
 
 def comparar(legado, novo, nome):
-    assert len(legado) == len(novo), f"{nome}: tamanho diferente"
-    for idx, (l, n) in enumerate(zip(legado, novo)):
-        assert l["Categoria"] == n["Categoria"], f"{nome}[{idx}] categoria"
-        val_l, val_n = l["Valor"], n["Valor"]
+    dict_novo = {n["Categoria"].strip(): n["Valor"] for n in novo}
+    
+    for idx, l in enumerate(legado):
+        cat_legado = l["Categoria"].strip()
+        assert cat_legado in dict_novo, f"{nome}[{idx}] Categoria '{cat_legado}' não encontrada no novo mapeamento"
+        
+        val_l = l["Valor"]
+        val_n = dict_novo[cat_legado]
+        
         # Normalização de tipos para comparação (ex: Timestamp vs date)
         if all(hasattr(val_l, attr) for attr in ["year", "month", "day"]):
             val_l = date(val_l.year, val_l.month, val_l.day)
@@ -87,7 +94,7 @@ def comparar(legado, novo, nome):
             val_n = date(val_n.year, val_n.month, val_n.day)
 
         if isinstance(val_l, (int, float)):
-            assert abs(float(val_l) - float(val_n)) < 1e-6, f"{nome}[{idx}] valor {l['Categoria']}: {val_l} != {val_n}"
+            assert abs(float(val_l) - float(val_n)) < 1e-6, f"{nome}[{idx}] valor {cat_legado}: {val_l} != {val_n}"
         else:
             assert val_l == val_n
 

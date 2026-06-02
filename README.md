@@ -12,6 +12,7 @@ Sistema de ETL (Extract-Transform-Load) para processamento automático de cartei
 - [Fluxo de Dados](#fluxo-de-dados)
 - [Fundos Suportados](#fundos-suportados)
 - [Administradoras](#administradoras)
+- [Gestão de Administradoras e Ingestão de APIs](#-gestão-de-administradoras-e-ingestão-de-apis)
 - [Configuração](#configuração)
 - [Como Executar](#como-executar)
 - [Testes](#testes)
@@ -52,7 +53,8 @@ O sistema segue os princípios **Clean Code**, **DRY** e **SOLID**:
 | **SRP** | Cada classe tem uma responsabilidade: `CarteiraBase` lê dados, `ReportBuilder` monta relatórios, `ExcelWriter` persiste |
 | **OCP** | Novo fundo = nova entrada no `REGISTRO` + novo `Builder`. Nenhum código existente é alterado |
 | **DIP** | `ExcelWriter` é injetado no executor — permite substituição por `DatabaseWriter` sem alterar builders |
-| **DRY** | Funções puras de conversão centralizadas em `src/core/converters.py` |
+| **DRY** | Funções puras em `src/core/converters.py` e mapeamentos otimizados de acordo com o [Guia de Clean Code & DRY para Mapeamentos](file:///c:/Users/Nowtek/Carmel%20Capital/TECNOLOGIA%20-%20Documentos/Geral/DESENVOLVIMENTO/PYTHON/CARTEIRA/docs/CLEAN_CODE_MAPPING_GUIDELINES.md) |
+
 
 ### Hierarquia de Classes de Carteira
 
@@ -231,6 +233,33 @@ processar_fundo_registrado("FIDARA", aba="CD_ATUAL")
 ### Portofino (`CarteiraPORTOFINO`)
 - Formato: `.xlsx` ou `.xlsm` (engine `openpyxl`)
 - Abas: `Page 1`, `Page 2`, `Page 3`
+
+---
+
+## 🏢 Gestão de Administradoras e Ingestão de APIs
+
+O sistema conta com um módulo robusto e moderno de orquestração e gerenciamento de Administradoras e APIs:
+
+### 1. Cadastro Dinâmico de Administradoras
+As administradoras do sistema são persistidas de forma configurável em `config.json` sob a chave `"administradoras"`. A interface gráfica permite cadastrar dinamicamente novos administradores a qualquer momento por meio do botão **"🏢 Cadastrar Administradora"**, que valida a inserção, atualiza as configurações em disco e recarrega as dropdowns do sistema instantaneamente.
+
+### 2. Resolução Dinâmica de Classe ETL
+Ao cadastrar ou carregar um fundo externo, o sistema resolve automaticamente a classe concreta de processamento de dados (`CarteiraBase`) a partir do nome da administradora selecionada:
+* **APEX** $\rightarrow$ `CarteiraApexAPI` (Consumo e Ingestão via API consolidada)
+* **AVANTI** $\rightarrow$ `CarteiraAVANTI`
+* **GENIAL** $\rightarrow$ `CarteiraGenial`
+* **TERRA** $\rightarrow$ `CarteiraTERRA`
+* **SINGULARE** $\rightarrow$ `CarteiraSingulareQI`
+* **Outros / Desconhecidos** $\rightarrow$ `Carteira` (Classe genérica baseada no parser padrão)
+
+### 3. Isolamento e Filtro Multilateral
+* **Telas de API (Ingestão & Mapeamento)**: São dedicadas exclusivamente às administradoras que possuem integração de API ativa (atualmente apenas **APEX**). Outros fundos cadastrados sob administradoras locais são automaticamente omitidos dessas interfaces para evitar conflitos de consumo.
+* **Tela de Lançamentos Locais (Launcher)**: Exibe e processa estritamente fundos cuja origem é local (sem integração via API), permitindo processar planilhas `.xlsx` e `.csv` livremente.
+
+### 4. Visual Launcher com Grupos Colapsáveis
+Para otimizar o fluxo de trabalho e a ergonomia visual, a página de **Lançamentos** agrupa os fundos locais por sua respectiva **Administradora**:
+* As seções iniciam **recolhidas por padrão**, garantindo um dashboard limpo e scannable.
+* Cada grupo exibe um indicador de estado (`▶` / `▼`) e se expande sob clique revelando a grid de 3 colunas com os fundos correspondentes.
 
 ---
 

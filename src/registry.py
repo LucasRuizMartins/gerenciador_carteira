@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from Carteira import CarteiraBase, CarteiraBRL, CarteiraAVANTI
+from Carteira import CarteiraBase, CarteiraBRL, CarteiraAVANTI, CarteiraGenial, CarteiraTERRA, CarteiraSingulareQI
 from src.core.carteira_apex_api import CarteiraApexAPI
 from src.config.settings import (
     configuracoes,
@@ -97,11 +97,34 @@ class ConfiguracaoFundo:
     chave_config_fundo: str | None = None
     abrir_apos_salvar: bool = True
     doc_fundo_api: str | None = None  # CNPJ ou identificador para consumo de API
+    administrador: str | None = None
+    tipo_api: str | None = None
 
     @property
     def chave_fundo_efetiva(self) -> str:
         """Retorna a chave de configuração de fundo com fallback para chave_gerencial."""
         return self.chave_config_fundo or self.chave_gerencial
+
+    @property
+    def administrador_efetivo(self) -> str:
+        """Retorna o nome do administrador do fundo (em maiúsculo)."""
+        if self.administrador:
+            return self.administrador.strip().upper()
+        # Fallback para as classes hardcoded
+        classe_name = self.classe_carteira.__name__
+        if "BRL" in classe_name:
+            return "BRL"
+        elif "AVANTI" in classe_name:
+            return "AVANTI"
+        elif "Genial" in classe_name:
+            return "GENIAL"
+        elif "TERRA" in classe_name:
+            return "TERRA"
+        elif "Singulare" in classe_name:
+            return "SINGULARE"
+        elif "Apex" in classe_name:
+            return "APEX"
+        return "OUTROS"
 
 
 
@@ -114,6 +137,22 @@ MAPA_APIS: dict[str, type[CarteiraBase]] = {
     # "genial": CarteiraGenialAPI,   # futuro
     # "avanti": CarteiraAvantiAPI,   # futuro
 }
+
+MAPA_CLASSES_ADMINISTRADOR: dict[str, type[CarteiraBase]] = {
+    "APEX": CarteiraApexAPI,
+    "AVANTI": CarteiraAVANTI,
+    "GENIAL": CarteiraGenial,
+    "TERRA": CarteiraTERRA,
+    "SINGULARE": CarteiraSingulareQI,
+}
+
+def obter_classe_carteira(administrador: str) -> type[CarteiraBase]:
+    from Carteira import Carteira
+    adm_upper = administrador.strip().upper()
+    for k, v in MAPA_CLASSES_ADMINISTRADOR.items():
+        if k in adm_upper or adm_upper in k:
+            return v
+    return Carteira
 
 # Rótulos de exibição para a interface gráfica
 ROTULOS_APIS: dict[str, str] = {
@@ -240,6 +279,26 @@ REGISTRO: dict[str, ConfiguracaoFundo] = {
         chave_gerencial="AVANTI",
         classe_carteira=CarteiraAVANTI,
         builder=lambda: ConfigDrivenBuilder.de_arquivo("AVANTI.json"),
+    ),
+    # ✅ Singulare/QI — Cobuccio FIDC
+    "COBUCCIO_FIDC": ConfiguracaoFundo(
+        nome="COBUCCIO FIDC",
+        chave_carteira="COBUCCIO FIDC",
+        chave_gerencial="COBUCCIO FIDC",
+        classe_carteira=CarteiraSingulareQI,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("COBUCCIO_FIDC.json"),
+        chave_config_fundo="COBUCCIO FIDC",
+        administrador="SINGULARE",
+    ),
+    # ✅ Singulare/QI — SB Credito FIDC
+    "SB_CREDITO_FIDC": ConfiguracaoFundo(
+        nome="SB CREDITO FIDC",
+        chave_carteira="SB CREDITO FIDC",
+        chave_gerencial="SB CREDITO FIDC",
+        classe_carteira=CarteiraSingulareQI,
+        builder=lambda: ConfigDrivenBuilder.de_arquivo("SB_CREDITO_FIDC.json"),
+        chave_config_fundo="SB CREDITO FIDC",
+        administrador="SINGULARE",
     ),
 }
 
@@ -453,8 +512,9 @@ def carregar_fundos_externos() -> None:
         if not chave or chave in REGISTRO:
             continue
 
+        administrador = entry.get("administrador", "APEX")
         tipo_api = entry.get("tipo_api", "apex").lower()
-        classe_carteira = MAPA_APIS.get(tipo_api, CarteiraApexAPI)
+        classe_carteira = obter_classe_carteira(administrador)
         arquivo_mapeamento = f"{chave}.json"
 
         # Garante que o arquivo de mapeamento existe
@@ -468,6 +528,8 @@ def carregar_fundos_externos() -> None:
             builder=lambda _f=arquivo_mapeamento: ConfigDrivenBuilder.de_arquivo(_f),
             chave_config_fundo=entry.get("chave_gerencial", chave),
             doc_fundo_api=entry.get("doc_fundo_api", ""),
+            administrador=administrador,
+            tipo_api=tipo_api,
         )
         logger.info(f"Fundo externo carregado: {chave} ({tipo_api})")
 
@@ -502,8 +564,9 @@ def salvar_fundo_externo(entry: dict) -> None:
     _criar_mapeamento_vazio(chave)
 
     # Atualiza o REGISTRO em memória imediatamente
+    administrador = entry.get("administrador", "APEX")
     tipo_api = entry.get("tipo_api", "apex").lower()
-    classe_carteira = MAPA_APIS.get(tipo_api, CarteiraApexAPI)
+    classe_carteira = obter_classe_carteira(administrador)
     arquivo_mapeamento = f"{chave}.json"
     REGISTRO[chave] = ConfiguracaoFundo(
         nome=entry.get("nome", chave),
@@ -513,6 +576,8 @@ def salvar_fundo_externo(entry: dict) -> None:
         builder=lambda _f=arquivo_mapeamento: ConfigDrivenBuilder.de_arquivo(_f),
         chave_config_fundo=entry.get("chave_gerencial", chave),
         doc_fundo_api=entry.get("doc_fundo_api", ""),
+        administrador=administrador,
+        tipo_api=tipo_api,
     )
 
 
@@ -527,7 +592,10 @@ def remover_fundo_externo(chave: str) -> None:
 
 def obter_fundos_api() -> list[str]:
     """Retorna a lista de chaves dos fundos que suportam ingestão via API."""
-    return [chave for chave, cfg in REGISTRO.items() if getattr(cfg, "doc_fundo_api", None)]
+    return [
+        chave for chave, cfg in REGISTRO.items()
+        if getattr(cfg, "doc_fundo_api", None) and getattr(cfg, "administrador", "APEX").upper() == "APEX"
+    ]
 
 
 # Carrega fundos externos automaticamente ao importar o módulo
@@ -595,16 +663,18 @@ def processar_fundo_registrado(
         from datetime import date, timedelta
         data_ref = data_referencia if data_referencia is not None else date.today() - timedelta(days=1)
         carteira = cfg.classe_carteira.criar_da_api(cfg.doc_fundo_api, data_ref)
+        contas_pagar = obter_contas_pagar_fundo(cfg.chave_fundo_efetiva)
+        if contas_pagar:
+            carteira.acrescentar_contas_pagar(*contas_pagar)
     else:
         carteira = cfg.classe_carteira(path_carteira)
+        contas_pagar = obter_contas_pagar_fundo(cfg.chave_fundo_efetiva)
+        if contas_pagar:
+            carteira.acrescentar_contas_pagar(*contas_pagar)
         carteira.carregar_dados(aba=aba)
     
     ingestion_time = time.time() - start_ingestion
     logger.info(f"Ingestão concluída em {ingestion_time:.2f}s")
-
-    contas_pagar = obter_contas_pagar_fundo(cfg.chave_fundo_efetiva)
-    if contas_pagar:
-        carteira.acrescentar_contas_pagar(*contas_pagar)
 
     # Constrói os mapeamentos
     start_mapping = time.time()

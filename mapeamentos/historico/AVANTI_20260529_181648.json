@@ -90,8 +90,8 @@
     },
     {
       "categoria": "Taxa de Administração",
-      "fonte": "taxa",
-      "campo": "valor_administracao"
+      "fonte": "custom",
+      "nome_funcao": "resolver_avanti_taxa_adm"
     },
     {
       "categoria": "Taxa de Custódia",

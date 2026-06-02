@@ -173,3 +173,41 @@ class TestRepr:
         c = CarteiraConcreta()
         c.patrimonio_total = 1_000_000.0
         assert "1" in repr(c)  # Ao menos parte do número aparece
+
+
+# ===========================================================================
+# TestPopularTaxas
+# ===========================================================================
+
+
+class TestPopularTaxas:
+    """Verifica que o método _popular_taxas mantém compatibilidade e aceita colunas customizadas."""
+
+    def test_popular_taxas_retrocompativel_por_padrao(self):
+        c = CarteiraConcreta()
+        # Mock do dataframe com as colunas tradicionais (Histórico e Valor Total)
+        df_tradicional = pd.DataFrame({
+            "Histórico": ["Administração", "Contas a pagar"],
+            "Valor Total": [150.0, 500.0]
+        })
+        
+        c._popular_taxas(df_tradicional)
+        
+        # Deve ter recuperado o valor da taxa de administração usando as colunas padrão
+        assert c.valor_administracao == 150.0
+        assert c.outros_valores_pagar == 500.0
+
+    def test_popular_taxas_suporta_colunas_customizadas(self):
+        c = CarteiraConcreta()
+        # Mock do dataframe com as colunas customizadas (CATEGORIA e Valor) usadas pelo Cobuccio
+        df_customizado = pd.DataFrame({
+            "CATEGORIA": ["Administração", "Gestão"],
+            "Valor": [200.0, 300.0]
+        })
+        
+        c._popular_taxas(df_customizado, coluna="CATEGORIA", coluna_valor="Valor")
+        
+        # Deve ter recuperado os valores corretos usando as novas colunas
+        assert c.valor_administracao == 200.0
+        assert c.valor_taxa_gestao == 300.0
+

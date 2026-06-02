@@ -157,6 +157,7 @@ class MappingEngine:
             "fixo":           self._resolver_fixo,
             "custom":         self._resolver_custom,
             "api_json":       self._resolver_api_json,
+            "soma_secao":     self._resolver_soma_secao,
         }
         resolver_fn = dispatch.get(item.fonte)
         if resolver_fn is None:
@@ -302,6 +303,39 @@ class MappingEngine:
                 f"Use engine.register_custom_resolver('{nome}', sua_funcao)."
             )
         return self._custom_resolvers[nome](carteira, item)
+
+    def _resolver_soma_secao(self, carteira: Any, item: Any) -> float:
+        """Soma todos os valores de uma coluna em uma seção do _dataframes.
+
+        Usado para somar seções inteiras da planilha Singulare/QI do COBUCCIO,
+        como Over/Compromissada (ltno + ntn o + lfto) e NTN-B (ntn) e ccven.
+
+        Exemplo no JSON:
+            {
+                "categoria": "NTN-B",
+                "fonte": "soma_secao",
+                "secao": "ntn",
+                "coluna": "Valor Líquido"
+            }
+        """
+        secao = getattr(item, "secao", None)
+        coluna = getattr(item, "coluna", None)
+        if not secao or not coluna:
+            logger.warning(f"soma_secao: 'secao' ou 'coluna' não definidos para '{item.categoria}'.")
+            return 0.0
+        try:
+            dataframes = getattr(carteira, "_dataframes", {})
+            df = dataframes.get(secao)
+            if df is None or df.empty:
+                logger.info(f"soma_secao: seção '{secao}' vazia ou inexistente.")
+                return 0.0
+            if coluna not in df.columns:
+                logger.info(f"soma_secao: coluna '{coluna}' não encontrada em seção '{secao}'.")
+                return 0.0
+            return float(df[coluna].sum())
+        except Exception as exc:
+            logger.error(f"Erro em soma_secao para '{item.categoria}': {exc}")
+            return 0.0
 
     def _resolver_api_json(self, carteira: Any, item: Any) -> Any:
         """Extrai um valor do JSON da API (carteira.raw_data) usando caminho de pontos e filtros.
