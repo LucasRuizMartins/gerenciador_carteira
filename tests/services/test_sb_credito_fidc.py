@@ -251,22 +251,31 @@ class TestCarteiraSingulareQILookup:
             "Valor Líquido": [12_000_000.0, 500_000.0]
         })
         
+        df_vcvpz = pd.DataFrame({
+            "Código": ["VCVPZ01", "VCVPZ02"],
+            "Valor Líquido": [800_000.0, 450_000.0]
+        })
+        
         carteira._dataframes = {
             "outros_ativos": df_oa,
-            "outros_fundos": df_of
+            "outros_fundos": df_of,
+            "vcvpz": df_vcvpz
         }
         
         # 1. Busca por string exata (coluna e código)
         assert carteira.recuperar_valor_carteira("GLEBA04", "Valor Total") == 100_000.0
         assert carteira.recuperar_valor_carteira("SBCRAV", "Valor Líquido") == 12_000_000.0
+        assert carteira.recuperar_valor_carteira("VCVPZ01", "Valor Líquido") == 800_000.0
         
         # 2. Busca por índice de coluna (inteiro)
         assert carteira.recuperar_valor_carteira("MT102245", 2) == 150_000.0
         assert carteira.recuperar_valor_carteira("739704", 1) == 500_000.0
+        assert carteira.recuperar_valor_carteira("VCVPZ02", 1) == 450_000.0
         
         # 3. Busca por código com espaço / minúsculo (case-insensitive)
         assert carteira.recuperar_valor_carteira("gleba04", "Valor Total") == 100_000.0
         assert carteira.recuperar_valor_carteira(" sbcrav ", "Valor Líquido") == 12_000_000.0
+        assert carteira.recuperar_valor_carteira("vcvpz01", "Valor Líquido") == 800_000.0
         
         # 4. Caso de código inexistente
         assert carteira.recuperar_valor_carteira("INEXISTENTE", "Valor Total") == 0.0

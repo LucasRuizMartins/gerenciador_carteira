@@ -109,12 +109,6 @@
     {
       "categoria": "Garantia/Execução",
       "fonte": "valor_carteira",
-      "chave_etl": "MAT15542",
-      "coluna": "Valor Total"
-    },
-    {
-      "categoria": "Garantia/Execução",
-      "fonte": "valor_carteira",
       "chave_etl": "MT102245",
       "coluna": "Valor Total"
     },

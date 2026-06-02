@@ -1342,7 +1342,9 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
 
     def _processar_planilha(self, aba="CD_ATUAL") -> dict[str, pd.DataFrame]:
         df = self.dataframe.reset_index(drop=True)
-        categorias_codigo = {
+        
+        # Fallback local com as seções padrão da Singulare
+        DEFAULT_SECOES = {
             "contas_pagar": "CPR",
             "outros_ativos": "OutrosAtivos",
             "outros_fundos": "OutrosFundos",
@@ -1361,20 +1363,42 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
             "pddnc": "PDDNC",
             "pdd_l": "PDD_L",
             "vdprz": "VDPRZ",
+            "vcvpz": "VCVPZ",
         }
+        try:
+            from src.config.settings import configuracoes
+            categorias_codigo = configuracoes().get("secoes_singulare", DEFAULT_SECOES)
+            if not categorias_codigo:
+                categorias_codigo = DEFAULT_SECOES
+        except Exception:
+            categorias_codigo = DEFAULT_SECOES
+
         linhas: dict[str, int] = {}
         for chave, nome in categorias_codigo.items():
-            # Busca exata
-            idx = df.index[df.iloc[:, 0] == nome].tolist()
-            if not idx:
-                # Busca flexível (sem espaços, sem hifens e case-insensitive)
-                nome_clean = str(nome).strip().upper().replace(" ", "").replace("-", "")
-                idx = df.index[df.iloc[:, 0].astype(str).str.strip().str.upper().str.replace(" ", "").str.replace("-", "") == nome_clean].tolist()
+            idx = []
+            # Procura nas duas primeiras colunas (coluna 0 e coluna 1)
+            for col_idx in [0, 1]:
+                if col_idx >= df.shape[1]:
+                    continue
+                # Busca exata na coluna
+                idx = df.index[df.iloc[:, col_idx] == nome].tolist()
+                if not idx:
+                    # Busca flexível (sem espaços, sem hifens e case-insensitive)
+                    nome_clean = str(nome).strip().upper().replace(" ", "").replace("-", "")
+                    idx = df.index[df.iloc[:, col_idx].astype(str).str.strip().str.upper().str.replace(" ", "").str.replace("-", "") == nome_clean].tolist()
+                if idx:
+                    break
             linhas[chave] = idx[0] if idx else len(df)
 
         def extrair(linha: int) -> pd.DataFrame:
-            start = pointer = linha + 1
-            mask = df.iloc[start:, 0].astype(str).str.contains(r"^Totais:$", na=False)
+            if linha >= len(df):
+                return pd.DataFrame()
+            start = linha + 1
+            # Procura por "Totais:" nas duas primeiras colunas
+            mask = pd.Series(False, index=df.index[start:])
+            for col_idx in [0, 1]:
+                if col_idx < df.shape[1]:
+                    mask = mask | df.iloc[start:, col_idx].astype(str).str.strip().str.contains(r"^Totais:$", na=False)
             end = mask.idxmax() if mask.any() else len(df)
             return _extrair_secao(df, start, end)
 
@@ -1383,12 +1407,8 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
     # --- Helpers privados ---
 
     def _carregar_referencias(self) -> None:
-        nomes = [
-            "outros_ativos", "outros_fundos", "mezanino", "senior",
-            "ntn", "ltno", "nc", "vccri", "pddcri", "tesouraria",
-            "ccven", "ntn o", "lfto", "vcnc", "pddnc", "pdd_l", "vdprz",
-        ]
-        for nome in nomes:
+        # Cria atributos dinamicamente baseados nas seções presentes no _dataframes
+        for nome in self._dataframes.keys():
             setattr(self, f"df_{nome}", self._dataframes.get(nome, pd.DataFrame()))
 
         df_tes = self._dataframes.get("tesouraria", pd.DataFrame())
@@ -1445,16 +1465,10 @@ class CarteiraSingulareQI(_MixinCdAtual, _MixinParseBRL, CarteiraBase):
         # 2. Se não encontrou, busca nos DataFrames das subseções estruturadas da Singulare
         from src.core.converters import limpar_valor_monetario
         
-        secoes = [
-            "outros_ativos", "outros_fundos", "mezanino", "senior",
-            "nc", "vcnc", "pddnc", "pdd_l", "vdprz", "ntn", "ltno",
-            "ntn o", "vccri", "pddcri", "tesouraria", "ccven", "lfto"
-        ]
-        
         codigo_normalizado = str(codigo).strip().upper()
         
-        for secao in secoes:
-            df = self._dataframes.get(secao)
+        # Itera dinamicamente por todas as seções carregadas em self._dataframes
+        for secao, df in self._dataframes.items():
             if df is None or df.empty:
                 continue
             

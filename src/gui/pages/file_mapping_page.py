@@ -170,10 +170,18 @@ class _ChipPanel(QWidget):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(6)
 
+        header = QHBoxLayout()
         lbl = QLabel("Variáveis Detectadas no Portfólio")
         lbl.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
         lbl.setStyleSheet(f"color: {COLORS['text']};")
-        root.addWidget(lbl)
+        header.addWidget(lbl)
+        header.addStretch()
+
+        self._btn_nova_secao = QPushButton("+ Nova Seção")
+        self._btn_nova_secao.setObjectName("btn_ghost")
+        self._btn_nova_secao.setFixedHeight(30)
+        header.addWidget(self._btn_nova_secao)
+        root.addLayout(header)
 
         legenda = QHBoxLayout()
         for cor, txt in [("#f05252", "Novo"), ("#f0a500", "Não mapeado"), ("#4caf82", "Mapeado")]:
@@ -270,14 +278,14 @@ class _ChipPanel(QWidget):
                 nome_folha = label
             elif grupo.startswith("Planilha:"):
                 # Agrupa linhas de planilha como subpastas de um nó raiz
-                raiz_planilha = obter_pasta("Linhas e Células (Browse do CSV/XLSX)", "📂")
+                raiz_planilha = obter_pasta("Áreas e Células (Browse do CSV/XLSX)", "📂")
                 nome_linha = grupo.replace("Planilha: ", "")
                 
                 # Cria subpasta para a linha específica da planilha
                 chave_sub = f"plan_{nome_linha}"
                 if chave_sub not in pastas_cache:
                     sub = QTreeWidgetItem(raiz_planilha)
-                    sub.setText(0, f"📄 Linha: {nome_linha}")
+                    sub.setText(0, f"📄 Área/Linha: {nome_linha}")
                     sub.setFont(0, QFont("Segoe UI", 9, QFont.Weight.Bold))
                     sub.setForeground(0, QColor(COLORS["text_muted"]))
                     pastas_cache[chave_sub] = sub
@@ -578,6 +586,7 @@ class FileMappingPage(QWidget):
         layout.setSpacing(12)
 
         chips = _ChipPanel()
+        chips._btn_nova_secao.clicked.connect(self._adicionar_secao_singulare)
         cards = _CardPanel()
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -653,6 +662,69 @@ class FileMappingPage(QWidget):
         self._btn_query.setEnabled(False)
         self._lbl_status.setText("Carregando e processando portfólio físico...")
         self._vm.carregar_arquivo_carteira(fundo)
+
+    def _adicionar_secao_singulare(self) -> None:
+        # Prompt 1: Chave da Seção (ex: vcvpz)
+        chave, ok1 = QInputDialog.getText(
+            self,
+            "Nova Seção Singulare",
+            "Identificador interno/chave (minúsculo, sem espaços, ex: vcvpz):"
+        )
+        if not ok1 or not chave.strip():
+            return
+        chave = chave.strip().lower().replace(" ", "")
+
+        # Prompt 2: Título da Seção no Excel (ex: VCVPZ)
+        titulo, ok2 = QInputDialog.getText(
+            self,
+            "Nova Seção Singulare",
+            f"Nome do cabeçalho da seção '{chave}' no Excel (ex: VCVPZ):"
+        )
+        if not ok2 or not titulo.strip():
+            return
+        titulo = titulo.strip()
+
+        # Adiciona ao config.json!
+        try:
+            from src.config.settings import RAIZ_PROJETO, invalidar_cache
+            config_path = RAIZ_PROJETO / "config.json"
+            if not config_path.exists():
+                QMessageBox.critical(self, "Erro", "Arquivo config.json não encontrado.")
+                return
+
+            import json
+            with open(config_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            if "secoes_singulare" not in data:
+                data["secoes_singulare"] = {}
+
+            # Verifica duplicados
+            if chave in data["secoes_singulare"]:
+                resp = QMessageBox.question(
+                    self,
+                    "Chave Existente",
+                    f"A chave '{chave}' já existe com o título '{data['secoes_singulare'][chave]}'. Deseja sobrescrever?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                if resp != QMessageBox.StandardButton.Yes:
+                    return
+
+            data["secoes_singulare"][chave] = titulo
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+
+            invalidar_cache()
+            QMessageBox.information(
+                self,
+                "Seção Adicionada",
+                f"Seção '{chave}': '{titulo}' adicionada com sucesso ao config.json!\n"
+                "Para que as variáveis apareçam, clique em '📂 Carregar Arquivo' novamente."
+            )
+            self._lbl_status.setText(f"✓ Seção '{chave}' cadastrada com sucesso.")
+        except Exception as e:
+            QMessageBox.critical(self, "Erro", f"Erro ao salvar seção: {e}")
 
     def _on_variaveis_prontas(self, variaveis: list[dict]) -> None:
         self._progress.setVisible(False)

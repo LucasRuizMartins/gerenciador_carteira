@@ -219,66 +219,142 @@ class _FileLoadWorker(QRunnable):
                             "grupo": "Taxas"
                         })
 
-            # 3. Linhas da Planilha (valor_carteira)
-            df_plan = getattr(carteira, "dataframe", None)
-            if df_plan is not None and not df_plan.empty:
-                col_chave = df_plan.columns[0]
-                current_headers = None
+            # 3. Linhas e Seções da Planilha (valor_carteira e soma_secao)
+            usou_secoes = False
+            dataframes = getattr(carteira, "_dataframes", {})
+            if dataframes:
+                # Filtra seções válidas
+                secoes_validas = {k: df for k, df in dataframes.items() if df is not None and not df.empty}
+                # Ignora as seções de contas/provisões e tesouraria pois são tratadas separadamente
+                secoes_ignorar = {"contas_pagar", "contas", "contas_receber", "tesouraria"}
+                secoes_validas = {k: df for k, df in secoes_validas.items() if k not in secoes_ignorar}
                 
-                for idx, row in df_plan.iterrows():
-                    # Detecta se é linha de cabeçalho
-                    row_values = row.tolist()
-                    row_str = [str(x).strip().lower() for x in row_values if not pd.isna(x)]
+                if secoes_validas:
+                    usou_secoes = True
+                    for secao_nome, df in secoes_validas.items():
+                        # A. Cria a "Soma Seção" para cada coluna numérica da seção
+                        for c_idx, col in enumerate(df.columns):
+                            series_num = pd.to_numeric(df.iloc[:, c_idx], errors='coerce')
+                            if not series_num.dropna().empty:
+                                try:
+                                    col_sum = float(series_num.sum())
+                                    variaveis.append({
+                                        "fonte": "soma_secao",
+                                        "secao": secao_nome,
+                                        "coluna": col,
+                                        "label": f"Soma Seção: {secao_nome} [{col}]",
+                                        "valor_retornado": col_sum,
+                                        "grupo": f"Planilha: {secao_nome}"
+                                    })
+                                except Exception:
+                                    pass
+                                    
+                        # B. Descobre a coluna que serve de chave (código do ativo) na seção
+                        col_chave = None
+                        col_chave_idx = None
+                        # Busca prioritária de colunas de identificadores
+                        nomes_busca = ["código", "codigo", "ativo", "papel", "descrição", "descricao", "histórico", "historico", "série", "serie", "emissão", "emissao", "nome"]
+                        for n in nomes_busca:
+                            for idx_col, c in enumerate(df.columns):
+                                if str(c).strip().lower() == n:
+                                    col_chave = c
+                                    col_chave_idx = idx_col
+                                    break
+                            if col_chave is not None:
+                                break
+                        if col_chave is None and len(df.columns) > 0:
+                            col_chave = df.columns[0]
+                            col_chave_idx = 0
+                            
+                        if col_chave_idx is not None:
+                            for idx, row in df.iterrows():
+                                chave_etl = row.iloc[col_chave_idx]
+                                if pd.isna(chave_etl):
+                                    continue
+                                if isinstance(chave_etl, (int, float)):
+                                    chave_etl = str(int(chave_etl))
+                                else:
+                                    chave_etl = str(chave_etl).strip()
+                                    
+                                if not chave_etl or chave_etl.startswith("Unnamed:") or chave_etl.lower() == "nan" or chave_etl.lower() == "totais:":
+                                    continue
+                                    
+                                # Para cada outra coluna (que seja numérica)
+                                for c_idx, col in enumerate(df.columns):
+                                    if c_idx == col_chave_idx:
+                                        continue
+                                    val = row.iloc[c_idx]
+                                    if pd.isna(val):
+                                        continue
+                                    try:
+                                        val_num = float(val)
+                                    except (ValueError, TypeError):
+                                        continue
+                                        
+                                    variaveis.append({
+                                        "fonte": "valor_carteira",
+                                        "chave_etl": chave_etl,
+                                        "coluna": col,
+                                        "label": f"{chave_etl} [{col}]",
+                                        "valor_retornado": val_num,
+                                        "grupo": f"Planilha: {secao_nome}"
+                                    })
+                                    
+            if not usou_secoes:
+                # Fallback anterior para o caso de não haver sub-seções mapeadas
+                df_plan = getattr(carteira, "dataframe", None)
+                if df_plan is not None and not df_plan.empty:
+                    col_chave = df_plan.columns[0]
+                    current_headers = None
                     
-                    # Se tiver termos comuns de cabeçalho, atualiza current_headers
-                    is_header = False
-                    is_header = False
-                    matching_cols = 0
-                    for x in row_str:
-                        if any(t == x or x.startswith(t) or x.endswith(t) for t in ["descri", "papel", "cod", "administr", "emit", "operac", "venc", "qtd", "taxa", "valor", "pl", "vlr", "pu", "ativo"]):
-                            matching_cols += 1
-                    is_header = matching_cols >= 2
-                    
-                    if is_header:
-                        current_headers = [str(x).strip() if not pd.isna(x) else f"Col {i}" for i, x in enumerate(row_values)]
-                        continue
-                    
-                    chave_etl = row[col_chave]
-                    if pd.isna(chave_etl) or not isinstance(chave_etl, str):
-                        continue
-                    chave_etl = chave_etl.strip()
-                    if not chave_etl or chave_etl.startswith("Unnamed:"):
-                        continue
-
-                    # Lista as colunas com valores numéricos para essa linha
-                    for c_idx in range(1, len(row)):
-                        val = row.iloc[c_idx]
-                        if pd.isna(val) or not isinstance(val, (int, float)):
+                    for idx, row in df_plan.iterrows():
+                        row_values = row.tolist()
+                        row_str = [str(x).strip().lower() for x in row_values if not pd.isna(x)]
+                        
+                        # Identifica se é linha de cabeçalho
+                        matching_cols = 0
+                        for x in row_str:
+                            if any(t == x or x.startswith(t) or x.endswith(t) for t in ["descri", "papel", "cod", "administr", "emit", "operac", "venc", "qtd", "taxa", "valor", "pl", "vlr", "pu", "ativo"]):
+                                matching_cols += 1
+                        is_header = matching_cols >= 2
+                        
+                        if is_header:
+                            current_headers = [str(x).strip() if not pd.isna(x) else f"Col {i}" for i, x in enumerate(row_values)]
                             continue
                         
-                        # Recupera o nome da coluna de current_headers se disponível
-                        col_id = c_idx  # Padrão: índice numérico
-                        if current_headers and c_idx < len(current_headers):
-                            col_name = current_headers[c_idx]
-                            if col_name.startswith("Unnamed:") or not col_name.strip():
-                                col_name = f"Col {c_idx}"
-                            else:
-                                # Se for nome real de cabeçalho, usa como ID para salvar robusto por string!
-                                col_id = col_name
-                        else:
-                            col_label = df_plan.columns[c_idx]
-                            col_name = str(col_label) if not str(col_label).startswith("Unnamed:") else f"Col {c_idx}"
-                            if not col_name.startswith("Col "):
-                                col_id = col_name
+                        chave_etl = row[col_chave]
+                        if pd.isna(chave_etl) or not isinstance(chave_etl, str):
+                            continue
+                        chave_etl = chave_etl.strip()
+                        if not chave_etl or chave_etl.startswith("Unnamed:"):
+                            continue
                         
-                        variaveis.append({
-                            "fonte": "valor_carteira",
-                            "chave_etl": chave_etl,
-                            "coluna": col_id,
-                            "label": f"{chave_etl} [{col_name}]",
-                            "valor_retornado": float(val),
-                            "grupo": f"Planilha: {chave_etl}"
-                        })
+                        for c_idx in range(1, len(row)):
+                            val = row.iloc[c_idx]
+                            if pd.isna(val) or not isinstance(val, (int, float)):
+                                continue
+                            
+                            col_id = c_idx
+                            if current_headers and c_idx < len(current_headers):
+                                col_name = current_headers[c_idx]
+                                if col_name.startswith("Unnamed:") or not col_name.strip():
+                                    col_name = f"Col {c_idx}"
+                                else:
+                                    col_id = col_name
+                            else:
+                                col_label = df_plan.columns[c_idx]
+                                col_name = str(col_label) if not str(col_label).startswith("Unnamed:") else f"Col {c_idx}"
+                                if not col_name.startswith("Col "):
+                                    col_id = col_name
+                            
+                            variaveis.append({
+                                "fonte": "valor_carteira",
+                                "chave_etl": chave_etl,
+                                "coluna": col_id,
+                                "label": f"{chave_etl} [{col_name}]",
+                                "valor_retornado": float(val),
+                                "grupo": f"Planilha: {chave_etl}"
+                            })
 
             # 4. Cotas (df_cotas_superiores)
             df_cotas = getattr(carteira, "df_cotas_superiores", None)

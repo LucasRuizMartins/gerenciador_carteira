@@ -275,6 +275,27 @@
       ]
     }
   },
+  "secoes_singulare": {
+    "contas_pagar": "CPR",
+    "outros_ativos": "OutrosAtivos",
+    "outros_fundos": "OutrosFundos",
+    "mezanino": "MEZAN",
+    "senior": "SRP",
+    "ntn": "NTN-B",
+    "ltno": "LTNO",
+    "nc": "NCPX",
+    "vccri": "VCCRI",
+    "pddcri": "PDCRI",
+    "tesouraria": "Tesouraria",
+    "ccven": "CCVEN",
+    "ntn o": "NTN O",
+    "lfto": "LFTO",
+    "vcnc": "VCNC",
+    "pddnc": "PDDNC",
+    "pdd_l": "PDD_L",
+    "vdprz": "VDPRZ",
+    "vcvpz": "VCVPZ"
+  },
   "administradoras": [
     "APEX",
     "Singulare",

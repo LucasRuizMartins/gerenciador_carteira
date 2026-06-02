@@ -309,6 +309,13 @@ Todos os paths são **relativos ao `USERPROFILE` do Windows**:
 
 Exemplo: `C:\Users\Nowtek\Carmel Capital\Arquivos - Documentos\...\FIDARA FIDC.xlsb`
 
+### Configuração Dinâmica de Seções (DRY)
+
+Para fundos complexos (como *Singulare*, *Cobuccio*, *SB Crédito*), a extração de seções específicas (ex: `SRP`, `VCNC`, `VDPRZ`) é feita de forma totalmente dinâmica via `config.json` (usando a chave `"secoes_singulare"`), eliminando a necessidade de hardcodes no backend.
+
+* **Backend Inteligente:** O método de extração busca o título da seção nas *duas primeiras colunas* da planilha, gerando sub-dataframes isolados para cada área. O `MappingEngine` pode somar valores inteiros de uma seção usando o resolver `soma_secao`.
+* **Interface Gráfica (UI):** O mapeador visual possui um botão **"+ Nova Seção"** na barra lateral esquerda ("Variáveis Detectadas no Portfólio"). Este botão permite que o usuário adicione uma nova cessão/seção sob demanda (informando a chave interna e o nome exato no Excel), gravando automaticamente no `config.json` e respeitando o limite do DRY.
+
 ---
 
 ## Como Executar

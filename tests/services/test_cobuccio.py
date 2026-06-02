@@ -93,6 +93,10 @@ def carteira_cobuccio():
             return 15_000_000.0
         if chave == "COBUVENC" and coluna == "Valor Líquido":
             return 800_000.0
+        if chave == "C411734" and coluna == "Pu Mercado":
+            return 1000.12
+        if chave == "C411735" and coluna == "Pu Mercado":
+            return 999.87
         return 0.0
     m.recuperar_valor_carteira.side_effect = mock_recuperar
 
